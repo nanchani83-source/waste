@@ -1,99 +1,287 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>의료폐기물 전용용기 신청</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 0; background:#f5f5f4; }
-    header { background:#2c7be4; color:white; padding:15px; text-align:center; }
-    .container { padding:15px; }
-    .card { background:white; border-radius:12px; padding:15px; margin-bottom:15px; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
-    label { display:block; margin-top:10px; font-weight:bold; }
-    input, select { width:100%; padding:10px; margin-top:5px; border-radius:8px; border:1px solid #ccc; }
-    button { width:100%; padding:12px; margin-top:15px; border:none; border-radius:10px; background:#2c7be5; color:white; font-size:16px; }
-    .menu { display:flex; justify-content:space-around; margin-bottom:15px; }
-    .menu-item { text-align:center; }
-    .menu-item img { width:60px; height:60px; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>의료폐기물 전용용기 신청</title>
+
+<style>
+body { font-family: Arial; margin:0; background:#f5f5f4; }
+header { background:#2c7be4; color:white; padding:15px; text-align:center; }
+.container { padding:15px; }
+.card { background:white; border-radius:12px; padding:15px; margin-bottom:15px; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
+label { display:block; margin-top:10px; font-weight:bold; }
+input, select { width:100%; padding:10px; margin-top:5px; border-radius:8px; border:1px solid #ccc; }
+button { width:100%; padding:12px; margin-top:15px; border:none; border-radius:10px; background:#2c7be5; color:white; font-size:16px; }
+table { width:100%; border-collapse: collapse; margin-top:10px; }
+th, td { border-bottom:1px solid #ddd; padding:8px; text-align:center; }
+.menu { display:flex; justify-content:space-around; margin-bottom:15px; }
+.menu-item { text-align:center; cursor:pointer; }
+.menu-item img { width:60px; height:60px; }
+.hidden { display:none; }
+.guide-img { width:80px; border-radius:8px; cursor:pointer; }
+
+/* 🔥 공지사항 핑크 */
+.pink { color:#FF007F; font-weight:bold; }
+
+/* 🔥 보관기한 빨간색 */
+.red { color:red; font-weight:bold; }
+
+/* 🔥 이미지 확대 모달 */
+.modal {
+  display:none;
+  position:fixed;
+  z-index:999;
+  left:0; top:0;
+  width:100%; height:100%;
+  background:rgba(0,0,0,0.8);
+  justify-content:center;
+  align-items:center;
+}
+.modal img {
+  max-width:90%;
+  max-height:90%;
+  border-radius:10px;
+}
+
+/* 공지사항 카드 */
+.notice {
+  border-left: 5px solid #2c7be5;
+  background: #ffffff;
+}
+
+/* 공지 제목 */
+.notice-title {
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #2c7be5;
+}
+
+/* 공지 내용 */
+.notice-text {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #333;
+}
+</style>
 </head>
+
 <body>
 
 <header>
-  <h2>의료폐기물 전용용기 신청</h2>
+  <div class="header-wrap">
+    <div class="header-title">KNUH_의료폐기물 전용용기 신청  ☎ 문의 4939, 2072</div>
+  </div>
 </header>
 
 <div class="container">
 
-  <!-- 메뉴 영역 -->
-  <div class="menu">
-    <div class="menu-item">
-      <img src="https://cdn-icons-png.flaticon.com/512/2921/2921222.png">
-      <div>신청</div>
-    </div>
-    <div class="menu-item">
-      <img src="https://cdn-icons-png.flaticon.com/512/1828/1828948.png">
-      <div>조회</div>
-    </div>
-    <div class="menu-item">
-      <img src="https://cdn-icons-png.flaticon.com/512/1828/1828895.png">
-      <div>안내</div>
-    </div>
+<!-- 메뉴 -->
+<div class="menu">
+  <div class="menu-item" onclick="showTab('form')">
+    <img src="https://cdn-icons-png.flaticon.com/512/2921/2921222.png">
+    <div>신청</div>
   </div>
-
-  <!-- 신청 폼 -->
-  <div class="card">
-    <h3>신청 정보</h3>
-
-    <label>발생 부서</label>
-    <input type="text" id="dept" placeholder="예: 40병동">
-
-    <label>용기 종류</label>
-    <select id="type">
-      <option value="격리">격리의료폐기물 30L</option>
-      <option value="격리">격리의료폐기물 20L</option>
-      <option value="액상">조직/액상의료폐기물 20L</option>
-      <option value="액상">조직/액상의료폐기물 10L</option>
-      <option value="손상성">손상성폐기물 5L(황색)</option>
-      <option value="손상성">손상성폐기물 2L(황색)</option>
-      <option value="손상성">손상성폐기물 2L(적색)</option>
-      <option value="손상성">손상성폐기물 1L(황색)</option>
-      <option value="손상성">손상성폐기물 1L(적색)</option>
-      <option value="봉투형">봉투형용기 12L</option>
-      <option value="봉투형">봉투형용기 5L</option>
-    </select>
-
-    <label>수량</label>
-    <input type="number" id="qty" placeholder="수량 입력">
-
-    <button onclick="submitForm()">신청하기</button>
+  <div class="menu-item" onclick="showTab('list')">
+    <img src="https://cdn-icons-png.flaticon.com/512/1828/1828948.png">
+    <div>조회</div>
   </div>
+  <div class="menu-item" onclick="showTab('guide')">
+    <img src="https://cdn-icons-png.flaticon.com/512/1828/1828895.png">
+    <div>안내</div>
+  </div>
+</div>
+
+<div class="card notice">
+  <div class="notice-title">📢 공지사항</div>
+  <div class="notice-text">
+    - 격리의료폐기물 30L 용기는 <span class="red">사용 제한</span> 중입니다. 시설과-1492(2026.03.30.) 의료폐기물 전용용기 사용 제한 협조 요청 관련<br>
+    - 전용용기는 신청 후 당일 또는 익일 처리됩니다.<br>
+    - <span class="pink">(예고)</span> 5월 의료폐기물 자체 지도점검 기간 : 05월 13일 ~ 15일 (3일간)<br>
+    - 문의 ☎ 4939, 2072 시설과 방종욱
+  </div>
+</div>
+
+<!-- 신청 -->
+<div id="form" class="card">
+<h3>신청</h3>
+
+<label>부서</label>
+<input type="text" id="dept" placeholder="예: 40병동">
+
+<label>용기 종류</label>
+<select id="type">
+<option value="격리 30L">격리의료폐기물 30L(사용제한 중)</option>
+<option value="격리 20L">격리의료폐기물 20L</option>
+<option value="조직/액상 20L">조직/액상의료폐기물 20L</option>
+<option value="조직/액상 10L">조직/액상의료폐기물 10L</option>
+<option value="손상성 5L">손상성폐기물 5L(황색)</option>
+<option value="손상성 2L황">손상성폐기물 2L(황색)</option>
+<option value="손상성 2L적">손상성폐기물 2L(적색)</option>
+<option value="손상성 1L황">손상성폐기물 1L(황색)</option>
+<option value="손상성 1L적">손상성폐기물 1L(적색)</option>
+<option value="봉투형 12L">봉투형용기 12L</option>
+<option value="봉투형 5L">봉투형용기 5L</option>
+</select>
+
+<label>수량</label>
+<input type="number" id="qty">
+
+<button onclick="submitForm()">신청하기</button>
+</div>
+
+<!-- 조회 -->
+<div id="list" class="card hidden">
+<h3>조회</h3>
+
+<input type="text" id="searchDept" placeholder="신청부서 입력">
+<button onclick="loadData()">신청 조회</button>
+
+<table>
+<thead>
+<tr>
+<th>날짜</th>
+<th>부서</th>
+<th>용기</th>
+<th>수량</th>
+</tr>
+</thead>
+<tbody id="result"></tbody>
+</table>
+</div>
+
+<!-- 안내 -->
+<div id="guide" class="card hidden">
+<h3>전용용기 종류 안내</h3>
+
+<table>
+<thead>
+<tr>
+<th>사진</th>
+<th>종류</th>
+<th>용량</th>
+<th>설명</th>
+</tr>
+</thead>
+
+<tbody>
+
+<tr>
+<td>
+<img class="guide-img" src="https://lh3.googleusercontent.com/d/1nB7Uyw97Va-FnNxEwjHBLslNiIL4Cr3f" onclick="showImage(this.src)">
+</td>
+<td>격리의료폐기물(원형 적색도형)</td>
+<td>30L / 20L</td>
+<td>감염병 환자 폐기물 (<span class="red">보관기한 5일</span>)</td>
+</tr>
+
+<tr>
+<td>
+<img class="guide-img" src="https://lh3.googleusercontent.com/d/1FOmmaGtgZLZAf8z-1-OIgTe9abR0DU8b" onclick="showImage(this.src)">
+</td>
+<td>조직/액상의료폐기물(원형 황색도형)</td>
+<td>20L / 10L</td>
+<td>혈액·인체조직, 액상폐기물 (<span class="red">보관기한 10일</span>)</td>
+</tr>
+
+<tr>
+<td>
+<img class="guide-img" src="https://lh3.googleusercontent.com/d/1_HXXlv5xzImjb8-xs1mQQXOMfjBzEhcy" onclick="showImage(this.src)">
+</td>
+<td>손상성폐기물(사각 황색도형)</td>
+<td>5L / 2L / 1L</td>
+<td>주사바늘 등 (<span class="red">보관기한 25일</span>)</td>
+</tr>
+
+<tr>
+<td>
+<img class="guide-img" src="https://lh3.googleusercontent.com/d/17INyVH-YnnMbLjeD8ay4tydI38I7ywl1" onclick="showImage(this.src)">
+</td>
+<td>격리 손상성폐기물(사각 적색도형)</td>
+<td>5L / 2L / 1L</td>
+<td>감염병 환자 손상성 (<span class="red">보관기한 5일</span>)</td>
+</tr>
+
+<tr>
+<td>
+<img class="guide-img" src="https://lh3.googleusercontent.com/d/1D4TjtM6R__yqb3IVVvol2aOGB6Yaf2yZ" onclick="showImage(this.src)">
+</td>
+<td>봉투형용기</td>
+<td>12L / 5L</td>
+<td>일반 의료폐기물 (<span class="red">보관기한 10일</span>)</td>
+</tr>
+
+</tbody>
+</table>
 
 </div>
 
-<script>
-function submitForm() {
-  const dept = document.getElementById('dept').value;
-  const type = document.getElementById('type').value;
-  const qty = document.getElementById('qty').value;
+</div>
 
-  if(!dept || !qty) {
-    alert('모든 값을 입력하세요');
+<!-- 🔥 이미지 확대 -->
+<div id="imgModal" class="modal" onclick="closeModal()">
+  <img id="modalImg">
+</div>
+
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycbzUH9ABnNDKgwsTp-eE7qx8eKf2AeMoxAVt0TRdClfSyFcb18Khvix24nF9f6t_sQ/exec";
+
+function showTab(tab) {
+  document.getElementById('form').classList.add('hidden');
+  document.getElementById('list').classList.add('hidden');
+  document.getElementById('guide').classList.add('hidden');
+  document.getElementById(tab).classList.remove('hidden');
+}
+
+function submitForm() {
+  const dept = document.getElementById("dept").value;
+  const type = document.getElementById("type").value;
+  const qty = document.getElementById("qty").value;
+
+  if(!dept || !qty){
+    alert("입력하세요");
     return;
   }
 
-fetch('https://script.google.com/macros/s/AKfycbzDOn_ch9w1-VcS_EvGH7oWK58UdUGcLUBek3GRzSDZrQO8POmhkP9OifiqC2xu6JU/exec', {
-  method: 'POST',
-  mode: 'no-cors',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ dept, type, qty })
-})
-.then(() => {
-  alert('신청 완료');
-})
-.catch(err => {
-  alert('오류: ' + err);
-});
+  fetch(API_URL, {
+    method:"POST",
+    mode:"no-cors",
+    headers:{ "Content-Type":"application/json"},
+    body: JSON.stringify({dept,type,qty})
+  })
+  .then(()=>alert("신청 완료"));
+}
+
+function loadData(){
+  const dept = document.getElementById("searchDept").value;
+
+  fetch(API_URL + "?dept=" + dept)
+  .then(res=>res.json())
+  .then(data=>{
+    const tbody = document.getElementById("result");
+    tbody.innerHTML="";
+
+    data.forEach(row=>{
+      const tr=document.createElement("tr");
+      tr.innerHTML=`
+        <td>${row.date}</td>
+        <td>${row.dept}</td>
+        <td>${row.type}</td>
+        <td>${row.qty}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  });
+}
+
+// 🔥 이미지 확대
+function showImage(src){
+  document.getElementById("modalImg").src = src;
+  document.getElementById("imgModal").style.display = "flex";
+}
+
+function closeModal(){
+  document.getElementById("imgModal").style.display = "none";
 }
 </script>
 
