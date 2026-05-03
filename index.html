@@ -244,7 +244,7 @@ th, td { border-bottom:1px solid #ddd; padding:8px; text-align:center; }
 </div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbwCvnIv9p5SKxa1EvuRD1ckgACoG3Q1tD4ETQeyqvucznNfKPAdiVpEctEgq5XM9S8/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbxg-JnXr2cqw0cTF1WCdy6zO4i6YDDyyhGgK47lgb4J-fJdaYHiInlBAsZuq3RUzpI/exec";
 
 function showTab(tab) {
   document.getElementById('form').classList.add('hidden');
@@ -253,72 +253,97 @@ function showTab(tab) {
   document.getElementById(tab).classList.remove('hidden');
 }
 
+// 신청하기 수정
 function submitForm() {
   const dept = document.getElementById("dept").value;
   const type = document.getElementById("type").value;
   const qty = document.getElementById("qty").value;
 
   if(!dept || !qty){
-    alert("입력하세요");
+    alert("부서와 수량을 입력해주세요.");
     return;
   }
 
+  // 버튼 비활성화 (중복 클릭 방지)
+  const btn = document.querySelector("#form button");
+  btn.disabled = true;
+  btn.innerText = "신청 중...";
+
   fetch(API_URL, {
-    method:"POST",
-    mode:"no-cors",
-    headers:{ "Content-Type":"application/json"},
-    body: JSON.stringify({dept,type,qty})
+    method: "POST",
+    body: JSON.stringify({dept, type, qty})
   })
-  .then(()=>alert("신청 완료"));
+  .then(res => res.json())
+  .then(data => {
+    if(data.result === "success") {
+      alert("✅ 신청이 완료되었습니다.");
+      document.getElementById("qty").value = ""; // 수량 초기화
+    } else {
+      alert("❌ 오류: " + data.message);
+    }
+  })
+  .catch(err => alert("네트워크 오류가 발생했습니다."))
+  .finally(() => {
+    btn.disabled = false;
+    btn.innerText = "신청하기";
+  });
 }
 
+// 데이터 로드 수정
 function loadData(){
   const dept = document.getElementById("searchDept").value;
+  const tbody = document.getElementById("result");
+  tbody.innerHTML = "<tr><td colspan='6'>로딩 중...</td></tr>";
 
-  fetch(API_URL + "?dept=" + dept)
-  .then(res=>res.json())
-  .then(data=>{
-    const tbody = document.getElementById("result");
-    tbody.innerHTML="";
+  fetch(API_URL + "?dept=" + encodeURIComponent(dept))
+  .then(res => res.json())
+  .then(data => {
+    tbody.innerHTML = "";
+    if(data.length === 0) {
+      tbody.innerHTML = "<tr><td colspan='6'>데이터가 없습니다.</td></tr>";
+      return;
+    }
 
-    data.forEach(row=>{
+    data.forEach(row => {
       const statusClass = row.status === "승인" ? "status-ok" : "status-wait";
-const tr = document.createElement("tr");
-
-tr.innerHTML = `
-  <td>${row.date}</td>
-  <td>${row.dept}</td>
-  <td>${row.type}</td>
-  <td>${row.qty}</td>
-  <td class="${statusClass}">${row.status}</td>
-  <td>
-    ${row.status==="대기" ? 
-    `<button class="small-btn" onclick="approve(${row.row})">승인</button>` : ""}
-  </td>
-`;
-
+      // 날짜 형식 예쁘게 자르기 (ISO 8601 대응)
+      const displayDate = row.date.includes("T") ? row.date.split("T")[0] : row.date;
+      
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${displayDate}</td>
+        <td>${row.dept}</td>
+        <td>${row.type}</td>
+        <td>${row.qty}</td>
+        <td class="${statusClass}">${row.status}</td>
+        <td>
+          ${row.status === "대기" ? 
+          `<button class="small-btn" onclick="approve(${row.row})">승인</button>` : "완료"}
+        </td>
+      `;
       tbody.appendChild(tr);
     });
   });
 }
 
-// 승인
+// 승인 처리 수정
 function approve(row){
-  const pw = prompt("관리자 비밀번호 입력");
+  const pw = prompt("관리자 비밀번호를 입력하세요.");
+  if (pw === null) return; // 취소 클릭 시 중단
 
-  fetch(API_URL + "?action=approve&row=" + row + "&pw=" + pw)
+  fetch(API_URL + "?action=approve&row=" + row + "&pw=" + encodeURIComponent(pw))
   .then(res => res.json())
   .then(data => {
     if(data.result === "approved"){
-      alert("승인");
+      alert("✅ 승인되었습니다.");
+      loadData();
     } else {
-      alert("권한 없음");
+      alert("❌ 실패: " + (data.message || "권한이 없습니다."));
     }
-    loadData();
   });
 }
 
-// 🔥 이미지 확대
+// 이미지 확대/축소
 function showImage(src){
   document.getElementById("modalImg").src = src;
   document.getElementById("imgModal").style.display = "flex";
