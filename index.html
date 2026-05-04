@@ -150,6 +150,7 @@ th, td { border-bottom:1px solid #ddd; padding:8px; text-align:center; }
   <div class="notice-text">
     - 격리의료폐기물 30L 용기는 <span class="red">사용 제한</span> 중입니다.<br>
     - 전용용기는 신청 후 당일 또는 익일 처리됩니다.<br>
+    - 전용용기 배송 가능 시간 07:00 ~ 15:30<br>
     - <span class="pink">(예고)</span> 5월 지도점검 기간 : 05월 13일 ~ 15일 (3일간)<br>
     - 문의 ☎ 4939, 2072 시설과 방종욱
   </div>
@@ -229,7 +230,7 @@ th, td { border-bottom:1px solid #ddd; padding:8px; text-align:center; }
       <div class="card-img"><img src="https://lh3.googleusercontent.com/d/1_HXXlv5xzImjb8-xs1mQQXOMfjBzEhcy" onclick="showImage(this.src)"></div>
       <div class="card-content">
         <div class="title">손상성폐기물 (사각 황색)</div>
-        <div class="capacity">용량: 5L / 2L / 1L</div>
+        <div class="capacity">용량: 5L (19*14*23) / 2L (14*10*16) / 1L (11*9*13)</div>
         <div class="desc">주사바늘, 칼날 등</div>
         <span class="badge yellow-bg">보관기한 25일</span>
       </div>
@@ -239,7 +240,7 @@ th, td { border-bottom:1px solid #ddd; padding:8px; text-align:center; }
       <div class="card-img"><img src="https://lh3.googleusercontent.com/d/17INyVH-YnnMbLjeD8ay4tydI38I7ywl1" onclick="showImage(this.src)"></div>
       <div class="card-content">
         <div class="title">격리 손상성폐기물 (사각 적색)</div>
-        <div class="capacity">용량: 5L / 2L / 1L</div>
+        <div class="capacity">용량: 2L (14*10*16) / 1L (11*9*13)</div>
         <div class="desc">감염병 환자 발생 손상성</div>
         <span class="badge red-bg">보관기한 5일</span>
       </div>
@@ -265,7 +266,7 @@ th, td { border-bottom:1px solid #ddd; padding:8px; text-align:center; }
 </div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbxg-JnXr2cqw0cTF1WCdy6zO4i6YDDyyhGgK47lgb4J-fJdaYHiInlBAsZuq3RUzpI/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycby_eAERbFHq43nnDMDnd0s3jki2kgquas4wHme-6k3qEel_EB0au6MoGk6O-wf_h6w/exec";
 
 function showTab(tab) {
   document.getElementById('form').classList.add('hidden');
@@ -295,7 +296,7 @@ function submitForm() {
   .then(res => res.json())
   .then(data => {
     if(data.result === "success") {
-      alert("✅ 신청이 완료되었습니다.");
+      alert("✅ 신청 완료!");
       document.getElementById("qty").value = "";
     } else {
       alert("❌ 오류: " + data.message);
@@ -343,19 +344,31 @@ function loadData(){
   });
 }
 
-function approve(row){
+function approve(row) {
   const pw = prompt("관리자 비밀번호를 입력하세요.");
-  if (pw === null) return;
+  if (pw === null || pw === "") return;
 
+  const btn = event.target;
+  btn.disabled = true;
+  btn.innerText = "...";
+
+  // 💡 웹에서는 direct=true를 붙이지 않습니다. -> GAS가 이름을 묻지 않고 즉시 승인함.
   fetch(API_URL + "?action=approve&row=" + row + "&pw=" + encodeURIComponent(pw))
   .then(res => res.json())
   .then(data => {
     if(data.result === "approved"){
-      alert("✅ 승인되었습니다.");
-      loadData();
+      alert("✅ 승인 완료 (웹)");
+      loadData(); // 목록 새로고침
     } else {
-      alert("❌ 실패: " + (data.message || "권한이 없습니다."));
+      alert("❌ 오류가 발생했습니다.");
+      btn.disabled = false;
+      btn.innerText = "승인";
     }
+  })
+  .catch(err => {
+    alert("네트워크 오류");
+    btn.disabled = false;
+    btn.innerText = "승인";
   });
 }
 
