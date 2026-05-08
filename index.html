@@ -115,6 +115,15 @@ th, td { border-bottom:1px solid #ddd; padding:8px; text-align:center; }
 @media (min-width: 600px) {
   .card-grid { grid-template-columns: 1fr 1fr; }
 }
+
+/* 라벨 안의 부가 설명 스타일 */
+.label-desc {
+  font-weight: normal; /* 굵기 해제 */
+  color: #888;         /* 회색 */
+  font-size: 13px;     /* 글자 크기 축소 */
+  margin-left: 5px;    /* 본문 라벨과 간격 */
+}
+
 </style>
 </head>
 
@@ -161,7 +170,7 @@ th, td { border-bottom:1px solid #ddd; padding:8px; text-align:center; }
 <h3>신청</h3>
 <label>부서</label>
 <input type="text" id="dept" placeholder="예: 40병동">
-<label>용기 종류</label>
+<label>용기 종류(안내)</label>
 <select id="type">
 <option value="격리 30L">격리의료폐기물 30L(사용제한 중)</option>
 <option value="격리 20L">격리의료폐기물 20L</option>
@@ -175,8 +184,16 @@ th, td { border-bottom:1px solid #ddd; padding:8px; text-align:center; }
 <option value="봉투형 12L">봉투형용기 12L</option>
 <option value="봉투형 5L">봉투형용기 5L</option>
 </select>
-<label>수량</label>
-<input type="number" id="qty">
+<label>수량 (5개 단위)</label>
+<select id="qty">
+  <option value="">수량을 선택하세요</option>
+  <option value="5">5개</option>
+  <option value="10">10개</option>
+  <option value="15">15개</option>
+  <option value="20">20개</option>
+  <option value="100">100개(봉투형용기)</option>
+  <option value="200">200개(봉투형용기)</option>
+</select>
 <button onclick="submitForm()">신청하기</button>
 </div>
 
@@ -266,7 +283,7 @@ th, td { border-bottom:1px solid #ddd; padding:8px; text-align:center; }
 </div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycby2G6jXHv8smRh_zmRnA2hYm2BORvm7D2hD3RcmI-wwcpmkxmoZOA_nxrqCskuu5Ds/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbz_-7sSbP4pPKbDjBintK2pYJ72OL3-d-XC1jDwI0A1y210jAgESJox-HTnmU4z9Q/exec";
 
 function showTab(tab) {
   document.getElementById('form').classList.add('hidden');
