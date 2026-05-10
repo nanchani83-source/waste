@@ -18,112 +18,36 @@ th, td { border-bottom:1px solid #ddd; padding:8px; text-align:center; }
 .menu { display:flex; justify-content:space-around; margin-bottom:15px; }
 .menu-item { text-align:center; cursor:pointer; }
 .menu-item img { width:60px; height:60px; }
-.hidden { display:none; }
+.hidden { display: none !important; }
 
-/* 🔥 카드 레이아웃 스타일 추가 */
-.card-grid {
-  display: grid;
-  grid-template-columns: 1fr; /* 기본 모바일 1열 */
-  gap: 15px;
-}
-
-.info-card {
-  display: flex;
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-  overflow: hidden;
-  align-items: center;
-}
-
-.card-img {
-  width: 100px;
-  min-width: 100px;
-  padding: 10px;
-  background: #f8f9fa;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.card-img img {
-  width: 100%;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.card-content {
-  padding: 12px;
-  flex-grow: 1;
-}
-
-.card-content .title {
-  font-size: 15px;
-  font-weight: bold;
-  margin: 0 0 5px 0;
-  color: #222;
-  line-height: 1.3;
-}
-
-.card-content .capacity, .card-content .desc {
-  font-size: 13px;
-  margin: 3px 0;
-  color: #666;
-}
-
-.badge {
-  display: inline-block;
-  margin-top: 8px;
-  padding: 4px 10px;
-  border-radius: 20px;
-  font-size: 11px;
-  font-weight: bold;
-}
-
+/* 카드 레이아웃 스타일 */
+.card-grid { display: grid; grid-template-columns: 1fr; gap: 15px; }
+.info-card { display: flex; background: #fff; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); overflow: hidden; align-items: center; }
+.card-img { width: 100px; min-width: 100px; padding: 10px; background: #f8f9fa; display: flex; align-items: center; justify-content: center; }
+.card-img img { width: 100%; border-radius: 6px; cursor: pointer; }
+.card-content { padding: 12px; flex-grow: 1; }
+.card-content .title { font-size: 15px; font-weight: bold; margin: 0 0 5px 0; color: #222; line-height: 1.3; }
+.card-content .capacity, .card-content .desc { font-size: 13px; margin: 3px 0; color: #666; }
+.badge { display: inline-block; margin-top: 8px; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: bold; }
 .red-bg { background: #ffebee; color: #d32f2f; }
 .yellow-bg { background: #fffde7; color: #f57f17; }
 .gray-bg { background: #f5f5f5; color: #616161; }
 
-/* 🔥 기존 스타일 유지 */
 .pink { color:#FF007F; font-weight:bold; }
 .red { color:red; font-weight:bold; }
 .status-wait { color: orange; font-weight: bold; }
 .status-ok { color: green; font-weight: bold; }
 
-.modal {
-  display:none;
-  position:fixed;
-  z-index:999;
-  left:0; top:0;
-  width:100%; height:100%;
-  background:rgba(0,0,0,0.8);
-  justify-content:center;
-  align-items:center;
-}
-.modal img {
-  max-width:90%;
-  max-height:90%;
-  border-radius:10px;
-}
+.modal { display:none; position:fixed; z-index:999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.8); justify-content:center; align-items:center; }
+.modal img { max-width:90%; max-height:90%; border-radius:10px; }
 
 .notice { border-left: 5px solid #2c7be5; background: #ffffff; }
 .notice-title { font-weight: 600; margin-bottom: 8px; color: #2c7be5; }
 .notice-text { font-size: 14px; line-height: 1.5; color: #333; }
 .small-btn { padding: 4px 8px; font-size: 12px; border-radius: 6px; background: #28a745; color: white; border: none; cursor: pointer; }
 
-/* 태블릿 이상 2열 */
-@media (min-width: 600px) {
-  .card-grid { grid-template-columns: 1fr 1fr; }
-}
-
-/* 라벨 안의 부가 설명 스타일 */
-.label-desc {
-  font-weight: normal; /* 굵기 해제 */
-  color: #888;         /* 회색 */
-  font-size: 13px;     /* 글자 크기 축소 */
-  margin-left: 5px;    /* 본문 라벨과 간격 */
-}
-
+@media (min-width: 600px) { .card-grid { grid-template-columns: 1fr 1fr; } }
+.label-desc { font-weight: normal; color: #666; font-size: 12px; margin-left: 5px; }
 </style>
 </head>
 
@@ -137,206 +61,202 @@ th, td { border-bottom:1px solid #ddd; padding:8px; text-align:center; }
 
 <div class="container">
 
-<!-- 메뉴 -->
-<div class="menu">
-  <div class="menu-item" onclick="showTab('form')">
-    <img src="https://cdn-icons-png.flaticon.com/512/2921/2921222.png">
-    <div>신청</div>
-  </div>
-  <div class="menu-item" onclick="showTab('list')">
-    <img src="https://cdn-icons-png.flaticon.com/512/1828/1828948.png">
-    <div>조회</div>
-  </div>
-  <div class="menu-item" onclick="showTab('guide')">
-    <img src="https://cdn-icons-png.flaticon.com/512/1828/1828895.png">
-    <div>안내</div>
-  </div>
-</div>
-
-<!-- 공지사항 -->
-<div class="card notice">
-  <div class="notice-title">📢 공지사항</div>
-  <div class="notice-text">
-    - 격리의료폐기물 30L 용기는 <span class="red">사용 제한</span> 중입니다.<br>
-    - 전용용기는 신청 후 당일 또는 익일 처리됩니다.<br>
-    - 전용용기 배송 가능 시간 07:00 ~ 15:30<br>
-    - <span class="pink">(예고)</span> 5월 지도점검 기간 : 05월 13일 ~ 15일 (3일간)<br>
-    - 문의 ☎ 4939, 2072 시설과 방종욱
-  </div>
-</div>
-
-<!-- 신청 탭 -->
-<div id="form" class="card">
-<h3>신청</h3>
-<label>부서</label>
-<input type="text" id="dept" placeholder="예: 40병동">
-<label>용기 종류(안내)</label>
-<select id="type">
-<option value="격리 30L">격리의료폐기물 30L(사용제한 중)</option>
-<option value="격리 20L">격리의료폐기물 20L</option>
-<option value="조직/액상 20L">조직/액상의료폐기물 20L</option>
-<option value="조직/액상 10L">조직/액상의료폐기물 10L</option>
-<option value="손상성 5L">손상성폐기물 5L(황색)</option>
-<option value="손상성 2L황">손상성폐기물 2L(황색)</option>
-<option value="손상성 2L적">손상성폐기물 2L(적색)</option>
-<option value="손상성 1L황">손상성폐기물 1L(황색)</option>
-<option value="손상성 1L적">손상성폐기물 1L(적색)</option>
-<option value="봉투형 12L">봉투형용기 12L</option>
-<option value="봉투형 5L">봉투형용기 5L</option>
-</select>
-<label>수량 (5개 단위)</label>
-<select id="qty">
-  <option value="">수량을 선택하세요</option>
-  <option value="5">5개</option>
-  <option value="10">10개</option>
-  <option value="15">15개</option>
-  <option value="20">20개</option>
-  <option value="100">100개(봉투형용기)</option>
-  <option value="200">200개(봉투형용기)</option>
-</select>
-<button onclick="submitForm()">신청하기</button>
-</div>
-
-<!-- 조회 탭 -->
-<div id="list" class="card hidden">
-<h3>조회</h3>
-<input type="text" id="searchDept" placeholder="신청부서 입력">
-<button onclick="loadData()">신청 조회</button>
-<div style="overflow-x:auto;">
-  <table>
-  <thead>
-  <tr>
-  <th>날짜</th>
-  <th>부서</th>
-  <th>용기</th>
-  <th>수량</th>
-  <th>상태</th>
-  <th>관리</th>
-  </tr>
-  </thead>
-  <tbody id="result"></tbody>
-  </table>
-</div>
-</div>
-
-<!-- 안내 탭 (카드 레이아웃 적용) -->
-<div id="guide" class="hidden">
-  <h3 style="padding-left:10px;">전용용기 종류 안내</h3>
-  <div class="card-grid">
-    <div class="info-card">
-      <div class="card-img"><img src="https://lh3.googleusercontent.com/d/1nB7Uyw97Va-FnNxEwjHBLslNiIL4Cr3f" onclick="showImage(this.src)"></div>
-      <div class="card-content">
-        <div class="title">격리의료폐기물 (원형 적색)</div>
-        <div class="capacity">용량: 30L (36*36) / 20L (30*35)</div>
-        <div class="desc">감염병 환자 폐기물</div>
-        <span class="badge red-bg">보관기한 5일</span>
-      </div>
+  <div class="menu">
+    <div class="menu-item" onclick="showTab('form')">
+      <img src="https://cdn-icons-png.flaticon.com/512/2921/2921222.png">
+      <div>신청</div>
     </div>
-
-    <div class="info-card">
-      <div class="card-img"><img src="https://lh3.googleusercontent.com/d/1FOmmaGtgZLZAf8z-1-OIgTe9abR0DU8b" onclick="showImage(this.src)"></div>
-      <div class="card-content">
-        <div class="title">조직/액상폐기물 (원형 황색)</div>
-        <div class="capacity">용량: 20L (30*35) / 10L (24*26)</div>
-        <div class="desc">혈액·인체조직, 액상폐기물</div>
-        <span class="badge yellow-bg">보관기한 10일</span>
-      </div>
+    <div class="menu-item" onclick="showTab('list')">
+      <img src="https://cdn-icons-png.flaticon.com/512/1828/1828948.png">
+      <div>조회</div>
     </div>
-
-    <div class="info-card">
-      <div class="card-img"><img src="https://lh3.googleusercontent.com/d/1_HXXlv5xzImjb8-xs1mQQXOMfjBzEhcy" onclick="showImage(this.src)"></div>
-      <div class="card-content">
-        <div class="title">손상성폐기물 (사각 황색)</div>
-        <div class="capacity">용량: 5L (19*14*23) / 2L (14*10*16) / 1L (11*9*13)</div>
-        <div class="desc">주사바늘, 칼날 등</div>
-        <span class="badge yellow-bg">보관기한 25일</span>
-      </div>
-    </div>
-
-    <div class="info-card">
-      <div class="card-img"><img src="https://lh3.googleusercontent.com/d/17INyVH-YnnMbLjeD8ay4tydI38I7ywl1" onclick="showImage(this.src)"></div>
-      <div class="card-content">
-        <div class="title">격리 손상성폐기물 (사각 적색)</div>
-        <div class="capacity">용량: 2L (14*10*16) / 1L (11*9*13)</div>
-        <div class="desc">감염병 환자 발생 손상성</div>
-        <span class="badge red-bg">보관기한 5일</span>
-      </div>
-    </div>
-
-    <div class="info-card">
-      <div class="card-img"><img src="https://lh3.googleusercontent.com/d/1D4TjtM6R__yqb3IVVvol2aOGB6Yaf2yZ" onclick="showImage(this.src)"></div>
-      <div class="card-content">
-        <div class="title">봉투형용기 (일반 의료)</div>
-        <div class="capacity">용량: 12L (50*67) / 5L (37*47)</div>
-        <div class="desc">일반 의료폐기물</div>
-        <span class="badge gray-bg">보관기한 10일</span>
-      </div>
+    <div class="menu-item" onclick="showTab('guide')">
+      <img src="https://cdn-icons-png.flaticon.com/512/1828/1828895.png">
+      <div>안내</div>
     </div>
   </div>
+
+  <div class="card notice">
+    <div class="notice-title">📢 공지사항</div>
+    <div class="notice-text">
+      - 격리의료폐기물 30L 용기는 <span class="red">사용 제한</span> 중입니다.<br>
+      - 전용용기는 신청 후 당일 또는 익일 처리됩니다.<br>
+      - 전용용기 배송 가능 시간 07:00 ~ 15:30<br>
+      - 문의 ☎ 4939, 2072 시설과 방종욱
+    </div>
+  </div>
+
+  <div id="form" class="card">
+    <h3>신청 작성</h3>
+    <label>부서</label>
+    <input type="text" id="dept" placeholder="예: 40병동">
+    <label>신청자</label>
+    <input type="text" id="applicant" placeholder="홍길동">
+
+    <hr style="margin:20px 0; border:0; border-top:1px dashed #ccc;">
+
+    <div style="background:#f9f9f9; padding:15px; border-radius:8px; border: 1px solid #eee;">
+      <label>용기 종류 <span class="label-desc">(안내 참조)</span></label>
+      <select id="type">
+        <option value="격리 30L">격리의료폐기물 30L(사용제한 중)</option>
+        <option value="격리 20L">격리의료폐기물 20L</option>
+        <option value="조직/액상 20L">조직/액상의료폐기물 20L</option>
+        <option value="조직/액상 10L">조직/액상의료폐기물 10L</option>
+        <option value="손상성 5L">손상성폐기물 5L(황색)</option>
+        <option value="손상성 2L황">손상성폐기물 2L(황색)</option>
+        <option value="손상성 2L적">손상성폐기물 2L(적색)</option>
+        <option value="손상성 1L황">손상성폐기물 1L(황색)</option>
+        <option value="손상성 1L적">손상성폐기물 1L(적색)</option>
+        <option value="봉투형 12L">봉투형용기 12L</option>
+        <option value="봉투형 5L">봉투형용기 5L</option>
+      </select>
+
+      <label>수량 <span class="label-desc">(5개 단위)</span></label>
+      <select id="qty" onchange="toggleQtyInput()">
+        <option value="">수량을 선택하세요</option>
+        <option value="5">5개</option>
+        <option value="10">10개</option>
+        <option value="15">15개</option>
+        <option value="20">20개</option>
+        <option value="100">100개(봉투형용기)</option>
+        <option value="200">200개(봉투형용기)</option>
+        <option value="direct">직접 입력(반납 등)</option>
+      </select>
+      
+      <input type="number" id="qty_direct" placeholder="반납 수량은 음수로 입력 (예: -10)" class="hidden" style="margin-top: 10px;">
+
+      <button onclick="addToCart()" style="background:#6c757d; margin-top:15px; border-radius: 8px;">✚ 목록에 담기</button>
+    </div>
+
+    <div id="cartArea" class="hidden" style="margin-top:20px;">
+      <label>📋 신청 확정 목록</label>
+      <table id="cartTable" style="background:#fff; border-top: 2px solid #2c7be5;">
+        <thead>
+          <tr><th>종류</th><th>수량</th><th>삭제</th></tr>
+        </thead>
+        <tbody id="cartBody"></tbody>
+      </table>
+      <button onclick="submitOrders()" style="background:#2c7be5; font-weight:bold; font-size: 18px; height: 55px; margin-top: 20px;">✅ 최종 신청 완료</button>
+    </div>
+  </div>
+
+  <div id="list" class="card hidden">
+    <h3>신청 내역 조회</h3>
+    <input type="text" id="searchDept" placeholder="부서명 입력">
+    <button onclick="loadData()">조회하기</button>
+    <div style="overflow-x:auto;">
+      <table>
+        <thead>
+          <tr><th>날짜</th><th>부서(신청자)</th><th>용기</th><th>수량</th><th>상태</th><th>관리</th></tr>
+        </thead>
+        <tbody id="result"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="guide" class="hidden">
+    <h3 style="padding-left:10px;">전용용기 종류 안내</h3>
+    <div class="card-grid">
+      <div class="info-card">
+        <div class="card-img"><img src="https://via.placeholder.com/100" onclick="showImage(this.src)"></div>
+        <div class="card-content">
+          <div class="title">격리의료폐기물 (원형 적색)</div>
+          <div class="capacity">30L / 20L</div>
+          <div class="desc">감염병 환자 폐기물</div>
+          <span class="badge red-bg">보관기한 5일</span>
+        </div>
+      </div>
+      </div>
+  </div>
+
 </div>
 
-</div> <!-- 컨테이너 끝 -->
-
-<!-- 이미지 확대 모달 -->
-<div id="imgModal" class="modal" onclick="closeModal()">
-  <img id="modalImg">
-</div>
+<div id="imgModal" class="modal" onclick="closeModal()"><img id="modalImg"></div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbz_-7sSbP4pPKbDjBintK2pYJ72OL3-d-XC1jDwI0A1y210jAgESJox-HTnmU4z9Q/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbz5Bd6t_K6j0YFtPyHhV6HazywhC4glp-LlHOMYU-9-4kozgdNnKYjTCxkpPuc59bU/exec";
+let cart = [];
 
-function showTab(tab) {
-  document.getElementById('form').classList.add('hidden');
-  document.getElementById('list').classList.add('hidden');
-  document.getElementById('guide').classList.add('hidden');
-  document.getElementById(tab).classList.remove('hidden');
+function toggleQtyInput() {
+  const qtySelect = document.getElementById("qty");
+  const qtyDirectInput = document.getElementById("qty_direct");
+  if (qtySelect.value === "direct") {
+    qtyDirectInput.classList.remove("hidden");
+    qtyDirectInput.focus();
+  } else {
+    qtyDirectInput.classList.add("hidden");
+    qtyDirectInput.value = "";
+  }
 }
 
-function submitForm() {
-  const dept = document.getElementById("dept").value;
+function addToCart() {
   const type = document.getElementById("type").value;
-  const qty = document.getElementById("qty").value;
+  const qtySelect = document.getElementById("qty").value;
+  const qtyDirect = document.getElementById("qty_direct").value;
+  const qty = (qtySelect === "direct") ? qtyDirect : qtySelect;
 
-  // 1. 필수 입력 체크
-  if(!dept || !qty){
-    alert("부서와 수량을 입력해주세요.");
-    return;
-  }
+  if(!qty || isNaN(qty) || qty == 0) return alert("올바른 수량을 입력해주세요.");
 
-  // 2. 🔥 확인 메시지 출력
-  // 사용자가 '확인'을 누르면 true, '취소'를 누르면 false를 반환합니다.
-  const confirmMsg = `📜 신청 내용을 확인해주세요.\n\n🏢 부서: ${dept}\n🧪 종류: ${type}\n📦 수량: ${qty}개\n\n이대로 신청하시겠습니까?`;
-  
-  if (!confirm(confirmMsg)) {
-    return; // 취소를 누르면 함수를 종료하여 전송을 중단합니다.
-  }
+  cart.push({ type, qty: Number(qty) });
+  renderCart();
+}
 
-  // 3. 전송 로직 진행
-  const btn = document.querySelector("#form button");
-  btn.disabled = true;
-  btn.innerText = "신청 중...";
+function renderCart() {
+  const body = document.getElementById("cartBody");
+  const area = document.getElementById("cartArea");
+  body.innerHTML = "";
+  if(cart.length > 0) area.classList.remove("hidden");
+  else area.classList.add("hidden");
+
+  cart.forEach((item, index) => {
+    body.innerHTML += `<tr>
+      <td>${item.type}</td>
+      <td>${item.qty}개</td>
+      <td><button onclick="removeItem(${index})" style="background:#ff4d4d; color:white; border:none; padding:4px 8px; border-radius:4px; margin:0; width:auto;">삭제</button></td>
+    </tr>`;
+  });
+}
+
+function removeItem(index) {
+  cart.splice(index, 1);
+  renderCart();
+}
+
+function submitOrders() {
+  const dept = document.getElementById("dept").value;
+  const applicant = document.getElementById("applicant").value;
+
+  if(!dept || !applicant || cart.length === 0) return alert("부서, 신청자 정보와 목록을 확인해주세요.");
+  if(!confirm(`${cart.length}건을 일괄 신청하시겠습니까?`)) return;
+
+  const btn = event.target;
+  btn.disabled = true; btn.innerText = "전송 중...";
 
   fetch(API_URL, {
     method: "POST",
-    body: JSON.stringify({dept, type, qty})
+    body: JSON.stringify({ dept, applicant, orders: cart })
   })
   .then(res => res.json())
   .then(data => {
     if(data.result === "success") {
-      alert("✅ 신청이 완료되었습니다.");
-      document.getElementById("qty").value = "";
-    } else {
-      alert("❌ 오류: " + data.message);
+      alert("✅ 신청 완료!");
+      cart = []; renderCart();
+      document.getElementById("dept").value = "";
+      document.getElementById("applicant").value = "";
     }
   })
-  .catch(err => alert("네트워크 오류가 발생했습니다."))
+  .catch(err => alert("네트워크 오류"))
   .finally(() => {
-    btn.disabled = false;
-    btn.innerText = "신청하기";
+    btn.disabled = false; btn.innerText = "✅ 최종 신청 완료";
   });
 }
 
-function loadData(){
+function showTab(tab) {
+  ['form', 'list', 'guide'].forEach(t => document.getElementById(t).classList.add('hidden'));
+  document.getElementById(tab).classList.remove('hidden');
+}
+
+function loadData() {
   const dept = document.getElementById("searchDept").value;
   const tbody = document.getElementById("result");
   tbody.innerHTML = "<tr><td colspan='6'>로딩 중...</td></tr>";
@@ -349,73 +269,33 @@ function loadData(){
       tbody.innerHTML = "<tr><td colspan='6'>데이터가 없습니다.</td></tr>";
       return;
     }
-
     data.forEach(row => {
       const statusClass = row.status === "승인" ? "status-ok" : "status-wait";
-      const displayDate = row.date.includes("T") ? row.date.split("T")[0] : row.date;
-      
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${displayDate}</td>
-        <td>${row.dept}</td>
+      tbody.innerHTML += `<tr>
+        <td>${row.date.split("T")[0]}</td>
+        <td>${row.dept}<br><small>(${row.applicant})</small></td>
         <td style="font-size:12px;">${row.type}</td>
         <td>${row.qty}</td>
         <td class="${statusClass}">${row.status}</td>
-        <td>
-          ${row.status === "대기" ? 
-          `<button class="small-btn" onclick="approve(${row.row})">승인</button>` : "완료"}
-        </td>
-      `;
-      tbody.appendChild(tr);
+        <td>${row.status === "대기" ? `<button class="small-btn" onclick="approve(${row.row})">승인</button>` : "완료"}</td>
+      </tr>`;
     });
   });
 }
 
 function approve(row) {
   const pw = prompt("관리자 비밀번호를 입력하세요.");
-  if (pw === null || pw === "") return;
-
-  const btn = event.target;
-  btn.disabled = true;
-  btn.innerText = "...";
-
-  // 호출 시 API_URL 뒤에 파라미터를 붙여 전송
+  if (!pw) return;
   fetch(API_URL + "?action=approve&row=" + row + "&pw=" + encodeURIComponent(pw))
   .then(res => res.json())
   .then(data => {
-    if (data.result === "approved") {
-      alert("✅ 승인이 완료되었습니다.");
-      loadData(); // 목록 새로고침
-    } 
-    // 💡 이 부분이 핵심입니다: GAS에서 보낸 에러 메시지를 alert으로 보여줍니다.
-    else if (data.result === "error") {
-      alert("⚠️ " + data.message); 
-      btn.disabled = false;
-      btn.innerText = "승인";
-    } 
-    else {
-      alert("❌ 알 수 없는 오류가 발생했습니다.");
-      btn.disabled = false;
-      btn.innerText = "승인";
-    }
-  })
-  .catch(err => {
-    // 진짜 인터넷이 끊겼거나 주소가 잘못되었을 때만 실행됩니다.
-    console.error(err);
-    alert("네트워크 연결 상태를 확인해주세요.");
-    btn.disabled = false;
-    btn.innerText = "승인";
+    if (data.result === "approved") { alert("✅ 승인 완료"); loadData(); }
+    else alert("⚠️ " + data.message);
   });
 }
 
-function showImage(src){
-  document.getElementById("modalImg").src = src;
-  document.getElementById("imgModal").style.display = "flex";
-}
-
-function closeModal(){
-  document.getElementById("imgModal").style.display = "none";
-}
+function showImage(src){ document.getElementById("modalImg").src = src; document.getElementById("imgModal").style.display = "flex"; }
+function closeModal(){ document.getElementById("imgModal").style.display = "none"; }
 </script>
 
 </body>
