@@ -76,15 +76,16 @@ th, td { border-bottom:1px solid #ddd; padding:8px; text-align:center; }
     </div>
   </div>
 
-  <div class="card notice">
-    <div class="notice-title">📢 공지사항</div>
-    <div class="notice-text">
-      - 격리의료폐기물 30L 용기는 <span class="red">사용 제한</span> 중입니다.<br>
-      - 전용용기는 신청 후 당일 또는 익일 처리됩니다.<br>
-      - 전용용기 배송 가능 시간 07:00 ~ 15:30<br>
-      - 문의 ☎ 4939, 2072 시설과 방종욱
-    </div>
+<div class="card notice">
+  <div class="notice-title">📢 공지사항</div>
+  <div class="notice-text">
+    - 격리의료폐기물 30L 용기는 <span class="red">사용 제한</span> 중입니다.<br>
+    - 전용용기는 신청 후 당일 또는 익일 처리됩니다.<br>
+    - 전용용기 배송 가능 시간 07:00 ~ 15:30<br>
+    - <span class="pink">(예정)</span> 5월 지도점검 기간 : 05월 13일 ~ 15일 (3일간)<br>
+    - 문의 ☎ 4939, 2072 시설과 방종욱
   </div>
+</div>
 
   <div id="form" class="card">
     <h3>신청 작성</h3>
@@ -107,6 +108,7 @@ th, td { border-bottom:1px solid #ddd; padding:8px; text-align:center; }
         <option value="손상성 2L적">손상성폐기물 2L(적색)</option>
         <option value="손상성 1L황">손상성폐기물 1L(황색)</option>
         <option value="손상성 1L적">손상성폐기물 1L(적색)</option>
+        <option value="골판지 63L">일반의료폐기물 63L</option>
         <option value="봉투형 12L">봉투형용기 12L</option>
         <option value="봉투형 5L">봉투형용기 5L</option>
       </select>
@@ -120,7 +122,7 @@ th, td { border-bottom:1px solid #ddd; padding:8px; text-align:center; }
         <option value="20">20개</option>
         <option value="100">100개(봉투형용기)</option>
         <option value="200">200개(봉투형용기)</option>
-        <option value="direct">직접 입력(반납 등)</option>
+        <option value="direct">반납(관리자 전용)</option>
       </select>
       
       <input type="number" id="qty_direct" placeholder="반납 수량은 음수로 입력 (예: -10)" class="hidden" style="margin-top: 10px;">
@@ -154,27 +156,78 @@ th, td { border-bottom:1px solid #ddd; padding:8px; text-align:center; }
     </div>
   </div>
 
-  <div id="guide" class="hidden">
-    <h3 style="padding-left:10px;">전용용기 종류 안내</h3>
-    <div class="card-grid">
-      <div class="info-card">
-        <div class="card-img"><img src="https://via.placeholder.com/100" onclick="showImage(this.src)"></div>
-        <div class="card-content">
-          <div class="title">격리의료폐기물 (원형 적색)</div>
-          <div class="capacity">30L / 20L</div>
-          <div class="desc">감염병 환자 폐기물</div>
-          <span class="badge red-bg">보관기한 5일</span>
-        </div>
+<div id="guide" class="hidden">
+  <h3 style="padding-left:10px;">전용용기 종류 안내</h3>
+  <div class="card-grid">
+    <div class="info-card">
+      <div class="card-img"><img src="https://lh3.googleusercontent.com/d/1nB7Uyw97Va-FnNxEwjHBLslNiIL4Cr3f" onclick="showImage(this.src)"></div>
+      <div class="card-content">
+        <div class="title">격리의료폐기물 (원형 적색)</div>
+        <div class="capacity">용량: 30L (36*36) / 20L (30*35)</div>
+        <div class="desc">감염병 환자 폐기물</div>
+        <span class="badge red-bg">보관기한 5일</span>
       </div>
+    </div>
+
+    <div class="info-card">
+      <div class="card-img"><img src="https://lh3.googleusercontent.com/d/1FOmmaGtgZLZAf8z-1-OIgTe9abR0DU8b" onclick="showImage(this.src)"></div>
+      <div class="card-content">
+        <div class="title">조직/액상폐기물 (원형 황색)</div>
+        <div class="capacity">용량: 20L (30*35) / 10L (24*26)</div>
+        <div class="desc">혈액·인체조직, 액상폐기물</div>
+        <span class="badge yellow-bg">보관기한 10일</span>
       </div>
+    </div>
+
+    <div class="info-card">
+      <div class="card-img"><img src="https://lh3.googleusercontent.com/d/1_HXXlv5xzImjb8-xs1mQQXOMfjBzEhcy" onclick="showImage(this.src)"></div>
+      <div class="card-content">
+        <div class="title">손상성폐기물 (사각 황색)</div>
+        <div class="capacity">용량: 5L (19*14*23) / 2L (14*10*16) / 1L (11*9*13)</div>
+        <div class="desc">주사바늘, 칼날 등</div>
+        <span class="badge yellow-bg">보관기한 25일</span>
+      </div>
+    </div>
+
+    <div class="info-card">
+      <div class="card-img"><img src="https://lh3.googleusercontent.com/d/17INyVH-YnnMbLjeD8ay4tydI38I7ywl1" onclick="showImage(this.src)"></div>
+      <div class="card-content">
+        <div class="title">격리 손상성폐기물 (사각 적색)</div>
+        <div class="capacity">용량: 2L (14*10*16) / 1L (11*9*13)</div>
+        <div class="desc">감염병 환자 발생 손상성</div>
+        <span class="badge red-bg">보관기한 5일</span>
+      </div>
+    </div>
+
+    <div class="info-card">
+      <div class="card-img"><img src="https://lh3.googleusercontent.com/d/1D4TjtM6R__yqb3IVVvol2aOGB6Yaf2yZ" onclick="showImage(this.src)"></div>
+      <div class="card-content">
+        <div class="title">봉투형용기 (일반 의료)</div>
+        <div class="capacity">용량: 12L (50*67) / 5L (37*47)</div>
+        <div class="desc">일반 의료폐기물</div>
+        <span class="badge gray-bg">보관기한 10일</span>
+      </div>
+    </div>
+
+    <div class="info-card">
+      <div class="card-img"><img src="https://lh3.googleusercontent.com/d/17INyVH-YnnMbLjeD8ay4tydI38I7ywl1" onclick="showImage(this.src)"></div>
+      <div class="card-content">
+        <div class="title">골판지류(일반 의료)</div>
+        <div class="capacity">용량: 63L (14*10*16)</div>
+        <div class="desc">일반 의료폐기물</div>
+        <span class="badge red-bg">보관기한 10일</span>
+      </div>
+    </div>
+
   </div>
+</div>
 
 </div>
 
 <div id="imgModal" class="modal" onclick="closeModal()"><img id="modalImg"></div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbz5Bd6t_K6j0YFtPyHhV6HazywhC4glp-LlHOMYU-9-4kozgdNnKYjTCxkpPuc59bU/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbx8vBvku6RraNsYFfP3xU-5MBEfr9UHxN_OMLBFvYltVZH5v3yQ6uP98ln0tgRPoWc/exec";
 let cart = [];
 
 function toggleQtyInput() {
@@ -194,11 +247,38 @@ function addToCart() {
   const qtySelect = document.getElementById("qty").value;
   const qtyDirect = document.getElementById("qty_direct").value;
   const qty = (qtySelect === "direct") ? qtyDirect : qtySelect;
+  const numQty = Number(qty);
 
-  if(!qty || isNaN(qty) || qty == 0) return alert("올바른 수량을 입력해주세요.");
+  // 1. 수량 기본 유효성 검사 (빈값, 숫자가 아님, 0 입력 방지)
+  if(!qty || isNaN(numQty) || numQty === 0) {
+    return alert("올바른 수량을 입력해주세요.");
+  }
 
-  cart.push({ type, qty: Number(qty) });
+  // 2. 반납(직접 입력)일 경우 체크
+  if (qtySelect === "direct") {
+    // [추가] 음수가 아닌 경우(양수인 경우) 차단 로직
+    if (numQty > 0) {
+      alert("⚠️ 반납 수량은 반드시 마이너스(-) 기호를 붙여서 입력해야 합니다.\n(예: -10)");
+      document.getElementById("qty_direct").focus();
+      return;
+    }
+
+    // 비밀번호 확인
+    const returnPw = prompt("반납 신청을 위해 비밀번호를 입력하세요.");
+    if (returnPw !== "0090") {
+      alert("비밀번호가 틀렸습니다. 반납 신청을 할 수 없습니다.");
+      return;
+    }
+  }
+
+  // 3. 목록(장바구니)에 추가
+  cart.push({ type, qty: numQty });
   renderCart();
+  
+  // 입력 필드 초기화
+  document.getElementById("qty").value = "";
+  document.getElementById("qty_direct").classList.add("hidden");
+  document.getElementById("qty_direct").value = "";
 }
 
 function renderCart() {
