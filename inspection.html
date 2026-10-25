@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>의료폐기물 지도점검</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  color-scheme: light;
+  --bg:#F2F4F7;
+  --surface:#FFFFFF;
+  --surface-2:#F6F8FA;
+  --ink:#15202B;
+  --ink-soft:#5B6673;
+  --ink-faint:#98A2AE;
+  --line:#E4E8EC;
+  --accent:#C2570C;
+  --accent-2:#E07020;
+  --accent-tint:#FDF0E6;
+  --red:#C62828;   --red-tint:#FDECEC;
+  --amber:#B45309; --amber-tint:#FEF3E2;
+  --green:#1E7B45; --green-tint:#E6F4EC;
+}
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--ink); font-family:"Noto Sans KR", "Malgun Gothic", -apple-system, sans-serif; -webkit-font-smoothing:antialiased; }
+
+/* ===== 상단 바 (메인 버튼) — 모든 세부 페이지 공통 ===== */
+.appbar { position:sticky; top:0; z-index:50; background:var(--accent); color:#fff; padding-top:env(safe-area-inset-top, 0px); box-shadow:0 4px 14px -6px rgba(15,23,42,.35); }
+.appbar-in { max-width:900px; margin:0 auto; height:64px; padding:0 14px; display:flex; align-items:center; gap:12px; }
+.appbar-home { flex:none; display:inline-flex; align-items:center; gap:2px; height:38px; padding:0 14px 0 8px; border-radius:999px; background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.24); color:#fff; text-decoration:none; font-size:14px; font-weight:700; -webkit-tap-highlight-color:transparent; }
+.appbar-home:hover { background:rgba(255,255,255,.24); }
+.appbar-home:active { transform:scale(.96); }
+.appbar-title { flex:1; min-width:0; display:flex; flex-direction:column; }
+.appbar-title .t { font-size:17px; font-weight:800; letter-spacing:-0.01em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.appbar-title .s { font-size:12px; opacity:.78; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+.container { max-width:900px; margin:0 auto; padding:16px 16px 40px; }
+.card { background:var(--surface); border:1px solid var(--line); border-radius:18px; padding:18px; margin-bottom:14px; }
+h3 { margin:0 0 4px; font-size:18px; font-weight:800; letter-spacing:-0.01em; }
+.hint { font-size:12px; color:var(--ink-faint); }
+.hidden { display:none !important; }
+
+/* ===== 안내 ===== */
+.notice-head { display:flex; align-items:center; gap:8px; font-size:15px; font-weight:700; margin-bottom:8px; }
+.notice-head svg { color:var(--accent); }
+.notice ul { margin:0; padding:0; list-style:none; }
+.notice li { position:relative; padding-left:14px; font-size:14px; line-height:1.7; color:var(--ink-soft); }
+.notice li::before { content:""; position:absolute; left:2px; top:11px; width:5px; height:5px; border-radius:50%; background:var(--ink-faint); }
+.placeholder { color:var(--ink-faint); }
+
+/* ===== 부서 검색 ===== */
+.search-row { display:flex; gap:8px; }
+.search-box { flex:1; position:relative; }
+.search-box svg { position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--ink-faint); }
+.search-box input { width:100%; height:48px; padding:0 14px 0 42px; border-radius:12px; border:1.5px solid var(--line); background:var(--surface); color:var(--ink); font-family:inherit; font-size:15px; outline:none; }
+.search-box input:focus { border-color:var(--accent-2); }
+.btn { flex:none; height:48px; padding:0 18px; border:none; border-radius:12px; background:var(--accent); color:#fff; font-family:inherit; font-size:15px; font-weight:700; cursor:pointer; }
+.btn:hover { background:#A84A09; }
+.btn-ghost { background:var(--surface); color:var(--ink-soft); border:1.5px solid var(--line); }
+.btn-ghost:hover { background:var(--surface-2); }
+
+/* ===== 요약 통계 ===== */
+.scope { font-size:13px; color:var(--ink-soft); margin:2px 4px 8px; font-weight:500; }
+.stats { display:grid; grid-template-columns:repeat(4, 1fr); gap:8px; margin-bottom:14px; }
+.stat { background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:14px 8px 12px; text-align:center; }
+.stat .num { font-size:24px; font-weight:800; color:var(--ink); line-height:1.2; }
+.stat .lbl { font-size:12px; color:var(--ink-soft); margin-top:4px; }
+.stat.warn .num { color:var(--red); }
+.stat.ok .num { color:var(--green); }
+.stat .num.date { font-size:15px; line-height:29px; }
+
+/* ===== 탭 (세그먼트) ===== */
+.tabs { display:grid; grid-template-columns:repeat(3, 1fr); gap:4px; padding:4px; margin-bottom:14px; background:#E6E9ED; border-radius:14px; }
+.tab { text-align:center; padding:11px 4px; border-radius:11px; color:var(--ink-soft); font-weight:700; font-size:14px; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+.tab.active { background:var(--surface); color:var(--accent); box-shadow:0 2px 6px rgba(15,23,42,.1); }
+
+/* ===== 표·상태 ===== */
+table { width:100%; border-collapse:collapse; margin-top:12px; font-size:14px; }
+th { background:var(--surface-2); color:var(--ink-soft); font-size:13px; font-weight:700; padding:10px 6px; border-bottom:1px solid var(--line); }
+td { border-bottom:1px solid var(--line); padding:10px 6px; text-align:center; }
+.badge { display:inline-block; padding:3px 10px; border-radius:999px; font-size:12px; font-weight:700; }
+.b-ok { background:var(--green-tint); color:var(--green); }
+.b-bad { background:var(--red-tint); color:var(--red); }
+.b-wait { background:var(--amber-tint); color:var(--amber); }
+.b-gray { background:#EEF1F4; color:var(--ink-soft); }
+
+.row-click { cursor:pointer; }
+.row-click:hover { background:#FBF7F3; }
+.detail td { background:var(--surface-2); text-align:left; padding:12px; }
+.check-list { display:grid; grid-template-columns:1fr; gap:2px; font-size:13px; }
+.check-list .ck { display:flex; justify-content:space-between; gap:10px; border-bottom:1px dashed var(--line); padding:5px 0; }
+.mark-o { color:var(--green); font-weight:800; }
+.mark-x { color:var(--red); font-weight:800; }
+
+/* ===== 위반사례 ===== */
+.chiprow { display:flex; gap:6px; overflow-x:auto; padding-bottom:6px; margin-bottom:10px; scrollbar-width:none; }
+.chiprow::-webkit-scrollbar { display:none; }
+.chip { flex:none; white-space:nowrap; font-size:13px; font-weight:700; padding:8px 14px; border-radius:999px; background:var(--surface); border:1px solid var(--line); color:var(--ink-soft); cursor:pointer; }
+.chip.active { background:var(--accent); border-color:var(--accent); color:#fff; }
+.case-grid { display:grid; grid-template-columns:1fr; gap:12px; }
+.case { background:var(--surface); border:1px solid var(--line); border-radius:18px; overflow:hidden; }
+.case-photos { display:grid; grid-template-columns:repeat(var(--cols, 3), 1fr); gap:2px; background:var(--line); }
+.case-photos .ph { position:relative; background:var(--surface-2); aspect-ratio:3/4; overflow:hidden; }
+.case-photos.one { grid-template-columns:1fr; }
+.case-photos.one .ph { aspect-ratio:4/3; }
+.case-photos img { width:100%; height:100%; object-fit:cover; cursor:zoom-in; display:block; }
+.case-photos .cap { position:absolute; left:6px; right:6px; bottom:6px; background:rgba(15,23,42,.68); color:#fff; font-size:11px; font-weight:500; line-height:1.35; padding:3px 7px; border-radius:6px; }
+.case.good { border-color:#BFE0CB; }
+.do-box { margin-top:10px; padding:10px 12px; border-radius:10px; background:var(--accent-tint); border-left:4px solid var(--accent); }
+.do-lbl { display:block; font-size:12px; font-weight:800; color:var(--accent); letter-spacing:.02em; margin-bottom:3px; }
+.do-txt { display:block; font-size:14px; font-weight:800; color:var(--ink); line-height:1.55; }
+.case-tip { margin-top:8px; padding:8px 10px; border-radius:10px; background:var(--accent-tint); font-size:12.5px; color:var(--ink); line-height:1.5; }
+.sub-head { font-size:15px; font-weight:800; margin:20px 2px 10px; }
+
+/* ===== 점검 이력 그룹 ===== */
+.group-row td { background:var(--accent-tint); color:var(--ink); text-align:left; font-weight:800; font-size:13px; padding:9px 10px; }
+.group-row .gsum { font-weight:500; color:var(--ink-soft); margin-left:6px; }
+.b-rep { background:var(--red-tint); color:var(--red); margin-left:4px; }
+.vlist { font-size:13px; line-height:1.8; }
+.vlist .mark-x { margin-left:4px; }
+.case-body { padding:14px; }
+.case-meta { font-size:12px; color:var(--ink-faint); margin-bottom:4px; }
+.case-title { font-size:15px; font-weight:800; margin-bottom:8px; display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+.case-text { font-size:13px; color:var(--ink-soft); line-height:1.6; }
+.case-text b { color:var(--ink); margin-right:4px; }
+
+/* ===== 점검항목 ===== */
+.item { display:flex; gap:12px; padding:12px 0; border-bottom:1px solid var(--line); font-size:14px; }
+.item:last-child { border-bottom:0; }
+.item .no { flex:none; width:36px; height:28px; border-radius:8px; background:var(--accent-tint); color:var(--accent); font-weight:800; font-size:13px; display:flex; align-items:center; justify-content:center; }
+.item .name { font-weight:700; }
+.item .basis { font-size:12px; color:var(--ink-faint); margin-top:3px; }
+
+.empty { text-align:center; color:var(--ink-faint); padding:32px 10px; font-size:14px; line-height:1.7; }
+
+.modal { display:none; position:fixed; z-index:999; inset:0; background:rgba(10,16,24,.85); justify-content:center; align-items:center; }
+.modal img { max-width:92%; max-height:88%; border-radius:14px; }
+
+@media (min-width:600px) { .case-grid { grid-template-columns:1fr 1fr; } .check-list { grid-template-columns:1fr 1fr; column-gap:24px; } }
+@media (max-width:420px) { .stats { grid-template-columns:repeat(2, 1fr); } table { font-size:13px; } th, td { padding:8px 4px; } .btn { padding:0 14px; } }
+</style>
+</head>
+
+<body>
+
+<header class="appbar">
+  <div class="appbar-in">
+    <a class="appbar-home" href="index.html" aria-label="메인 화면으로">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>메인
+    </a>
+    <div class="appbar-title">
+      <span class="t">의료폐기물 지도점검</span>
+      <span class="s">부서별 점검 이력 · 위반사례</span>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+
+  <div class="card notice">
+    <div class="notice-head">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v6"/><path d="M12 7.5h.01"/></svg>
+      지도점검 안내
+    </div>
+    <ul id="noticeText">
+      <li>점검 주기 : 환경청 점검(불시), 정기 점검 연 2회, 그 외 수시</li>
+      <li>점검 대상 : 의료폐기물 배출 부서 (병동 · 외래 · 검사실 등)</li>
+      <li>점검 방법 : 현장 지도점검 (분리배출, 규정 준수 등)</li>
+      <li>법적 근거 : 폐기물관리법 제13조</li>
+      <li>위반 시 : <b style="color:var(--red)">고발, 2년 이하의 징역 또는 2천만원 이하의 벌금</b></li>
+    </ul>
+  </div>
+
+  <div class="search-row" style="margin-bottom:14px;">
+    <div class="search-box">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <input type="text" id="searchDept" list="deptList" placeholder="부서명 (예: 40병동)">
+      <datalist id="deptList"></datalist>
+    </div>
+    <button class="btn" onclick="applyFilter()">조회</button>
+    <button class="btn btn-ghost" onclick="resetFilter()">전체</button>
+  </div>
+
+  <div class="scope" id="scopeText">전체 부서 기준</div>
+  <div class="stats">
+    <div class="stat"><div class="num" id="stCount">0</div><div class="lbl">점검 차수</div></div>
+    <div class="stat"><div class="num" id="stDept">0</div><div class="lbl">위반 부서</div></div>
+    <div class="stat warn"><div class="num" id="stViol">0</div><div class="lbl">위반 건수</div></div>
+    <div class="stat"><div class="num date" id="stLast">-</div><div class="lbl">최근 점검일</div></div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" data-tab="history" onclick="showTab('history')">점검 이력</div>
+    <div class="tab" data-tab="cases" onclick="showTab('cases')">위반사례</div>
+    <div class="tab" data-tab="items" onclick="showTab('items')">점검항목</div>
+  </div>
+
+  <!-- 점검 이력 -->
+  <div id="history" class="card">
+    <h3>부서별 점검 이력</h3>
+    <div class="hint">위반이 확인된 부서만 표시됩니다. 행을 누르면 위반 내용을 알수 있습니다.</div>
+    <div style="overflow-x:auto;">
+      <table>
+        <thead>
+          <tr><th>점검월</th><th>부서</th><th>위반</th><th>조치</th></tr>
+        </thead>
+        <tbody id="historyBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 위반사례 -->
+  <div id="cases" class="hidden">
+    <div id="caseGrid"></div>
+  </div>
+
+  <!-- 점검항목 -->
+  <div id="items" class="card hidden">
+    <h3>지도점검 항목</h3>
+    <div id="itemList"></div>
+  </div>
+
+</div>
+
+<div id="imgModal" class="modal" onclick="closeModal()"><img id="modalImg"></div>
+
+<script>
+// ============================================================
+// 데이터 입력 영역
+// - 점검 내용은 아래 배열에 채우면 화면에 자동 반영됨
+// - 구글 시트로 관리하려면 INSPECTION_API 에 앱스 스크립트 배포 URL 입력
+//   (응답 형식: { inspections:[...], violations:[...] }, 각 항목 형식은 아래 예시와 동일)
+// - 점검자는 개인 이름 대신 부서명(예: 시설과)으로 기재
+// ============================================================
+const INSPECTION_API = "";
+
+// 점검항목 (점검표 양식) — 병원 점검표에 맞게 수정
+const CHECK_ITEMS = [
+  { id:"A1", name:"배출자·사용개시연월일 기재",              basis:"사용개시일은 최초 투입일 기재, 보관기간 산정 기준" },
+  { id:"A2", name:"일반쓰레기 혼입 금지",                    basis:"의료소모품 포장지·종이류·핸드타올·알콜티슈 케이스 등은 일반쓰레기 (개인정보가 담긴 종이는 파쇄)" },
+  { id:"A3", name:"적정 용량 준수·과적재 금지",         basis:"과적재 시 밀폐 포장 불가, 봉투형용기 적정용량 75% 준수" },
+  { id:"A4", name:"사용 중 용기 뚜껑·덮개 닫힘(인증)",            basis:"악취·감염 전파 방지 (권장사항)" },
+  { id:"A5", name:"손상성폐기물 합성수지 용기 사용",        basis:"주사바늘·칼날 등은 합성수지 상자형 용기" },
+  { id:"A6", name:"적정 전용용기 사용 (액상·조직물류)",     basis:"액체상태 폐기물은 합성수지 용기 사용, 내부 용액 제거 후 폐기" },
+  { id:"A7", name:"부서 보관기한 준수",                     basis:"부서 보관기한 : 격리 5일 / 조직·액상·일반 10일 / 손상성 25일" },
+  { id:"A8", name:"일회용기저귀 분리배출",                  basis:"혈변, 혈액 포함된 일회용기저귀는 의료폐기물 용기 사용" },
+  { id:"A9", name:"투입 완료 용기 밀폐 포장",               basis:"투입이 끝난 용기는 밀폐, 재사용 금지" }
+];
+
+const LAW = "폐기물관리법, 2년 이하의 징역 또는 2천만원 이하의 벌금";
+const COST = "의료폐기물 발생량 증가, 관리비 상승 (병원 운영계획 위배)";
+
+// 점검 이력 — 위반이 확인된 부서만 기재
+// items: 점검항목 id별 위반 건수, repeat: 올해 이전 점검에서도 지적된 부서
+const INSPECTIONS = [
+  // 2026년 5월
+  { date:"2026-05", dept:"42병동",        items:{ A3:2, A2:2 }, action:"현장지도, 해당 용기 배출/교체" },
+  { date:"2026-05", dept:"52병동",        items:{ A6:1 },       action:"현장지도, 해당 용기 배출/교체" },
+  { date:"2026-05", dept:"82병동",        items:{ A1:2 },       action:"현장지도, 사용개시연월일 기재" },
+  { date:"2026-05", dept:"제2물리치료실", items:{ A1:1 },       action:"현장지도, 사용개시연월일 기재" },
+  { date:"2026-05", dept:"CCU",           items:{ A2:1 },       action:"현장지도" },
+  { date:"2026-05", dept:"50병동",        items:{ A3:1 },       action:"관련 내용 전달, 주의 요청", note:"점검 외 평시 의료폐기물 수거 시 확인 (과적재, 밀폐 포장 불가)" },
+  // 2026년 7월 (점검일 07.10.)
+  { date:"2026-07", dept:"어린이병원 채혈실", items:{ A7:2 },       action:"현장지도, 해당 용기 배출/교체" },
+  { date:"2026-07", dept:"NICU",          items:{ A7:1, A2:1 }, action:"현장지도, 해당 용기 배출/교체" },
+  { date:"2026-07", dept:"40병동",        items:{ A2:1 },       action:"현장지도" },
+  { date:"2026-07", dept:"42병동",        items:{ A1:1 },       action:"현장지도, 사용개시연월일 기재", repeat:true, note:"'26.05. 과적재 2건, 혼입 2건" },
+  { date:"2026-07", dept:"45병동",        items:{ A1:1 },       action:"현장지도, 사용개시연월일 기재" },
+  { date:"2026-07", dept:"53병동",        items:{ A1:2 },       action:"현장지도, 사용개시연월일 기재" },
+  { date:"2026-07", dept:"63병동",        items:{ A1:1, A2:1 }, action:"현장지도, 사용개시연월일 기재" },
+  // 2026년 9월
+  { date:"2026-09", dept:"핵의학과",      items:{ A1:1 },             action:"현장지도, 사용개시연월일 기재" },
+  { date:"2026-09", dept:"33병동",        items:{ A7:2 },             action:"현장지도, 해당 용기 배출/교체" },
+  { date:"2026-09", dept:"52병동",        items:{ A3:2, A1:1, A2:1 }, action:"현장지도, 해당 용기 배출/교체, 사용개시연월일 기재", repeat:true, note:"'26.05. 부적정 전용용기 1건" },
+  { date:"2026-09", dept:"53병동",        items:{ A7:1, A1:2, A2:1 }, action:"현장지도, 해당 용기 배출/교체, 사용개시연월일 기재", repeat:true, note:"'26.07. 미기재 2건 (반복 발생)" },
+];
+
+// 위반사례 예시 — 유형별 대표 1건 (타 부서 참고용, 문서·개인정보가 보이는 사진은 흐림 처리)
+// 사진 : photo = 구글드라이브 파일 ID(드라이브 "지도점검 위반사례" 폴더, 링크 공유 필요), file = 포털 폴더 백업 사진(드라이브 로딩 실패 시 표시)
+const PHOTO_BASE = "img/inspection/";
+const DRIVE_IMG = "https://lh3.googleusercontent.com/d/";
+const VIOLATIONS = [
+  { item:"A1", title:"배출자·사용개시연월일 미기재", photo:"14IDTcDGVZ-x493SVroiV1JGKc9dwThrD", file:"A1.jpg", cap:"사용개시연월일·배출자 칸이 비어 있음",
+    law:LAW, how:"용기에 처음 폐기물을 넣는 날, 배출자(부서명)와 사용개시연월일을 반드시 기재하십시오." },
+  { item:"A2", title:"일반쓰레기 혼입", photo:"1mykoP01Khw7LrzMZvrEk-b_FfiqX8p20", file:"A2.jpg", cap:"의료소모품 포장지·핸드타올 등이 혼입됨",
+    law:COST, how:"의료소모품 포장지, 핸드타올, 알콜티슈 케이스 등은 일반쓰레기로 배출하십시오. 개인정보가 담긴 종이는 파쇄 후 일반쓰레기로 배출하십시오." },
+  { item:"A3", title:"과적재·적정 용량 미준수", photo:"1uF3455ml2cjKxx_ZZy7bNWtQYqNCMGh5", file:"A3.jpg", cap:"봉투형용기 적정용량 초과",
+    law:LAW, how:"의료폐기물은 전용용기에 밀폐 가능한 범위내에 가득 채워 배출하여야 합니다. 단, 봉투형용기는 75% 미만으로 채워 배출하십시오." },
+  { item:"A6", title:"부적정 전용용기 사용", photo:"1CzmSoglqQIFrsZtFoEhBzs-YVI4XFXtW", file:"A6.jpg", cap:"손상성·액상 폐기물을 봉투형용기에 배출",
+    law:LAW, how:"손상성·액상 폐기물은 합성수지 전용용기에 배출하십시오. 액상은 내부 용액을 제거한 뒤 폐기하십시오." },
+  { item:"A7", title:"부서 보관기한 초과", photo:"19g4JR46UVN1bucQGOAnyVtMu8b4CKqKc", file:"A7.jpg", cap:"사용개시 26.6.4. → 점검일 07.10. 보관기한(10일) 초과",
+    law:LAW, how:"일반의료폐기물의 부서 보관기간은 10일입니다 (격리 5일 / 손상성 25일). 기한 내에 반출을 요청하십시오." },
+];
+
+// 우수사례 (특기사항)
+const GOOD_CASES = [
+  { dept:"63병동", title:"사용개시연월일 추가 표기 (선진사례)", photo:"1OVMwsAJAM8A9OL_27LVbHvBVQw397XvV", file:"2609-12.jpg", cap:"봉투형용기 거치대 외부에 사용개시연월일 추가 표기",
+    desc:"봉투형용기 거치대 바깥에도 사용개시연월일을 적어 보관기한을 한눈에 확인할 수 있습니다." },
+];
+// ============================================================
+
+let inspections = INSPECTIONS;
+let violations = VIOLATIONS;
+let goodCases = GOOD_CASES;
+let deptFilter = "";
+
+function esc(s) {
+  return String(s == null ? "" : s).replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+}
+function itemName(id) {
+  const it = CHECK_ITEMS.find(i => i.id === id);
+  return it ? it.name : id;
+}
+function violCount(insp) {
+  return Object.values(insp.items || {}).reduce((a, b) => a + b, 0);
+}
+function matchDept(dept) {
+  const list = Array.isArray(dept) ? dept : [dept];
+  return !deptFilter || list.some(d => String(d).toLowerCase().includes(deptFilter.toLowerCase()));
+}
+function fmtMonth(d) {
+  const [y, m] = String(d).split("-");
+  return m ? `${y}년 ${Number(m)}월` : d;
+}
+
+function showTab(tab) {
+  ['history', 'cases', 'items'].forEach(t => document.getElementById(t).classList.add('hidden'));
+  document.getElementById(tab).classList.remove('hidden');
+  document.querySelectorAll('.tab').forEach(el => el.classList.toggle('active', el.dataset.tab === tab));
+}
+
+function applyFilter() {
+  deptFilter = document.getElementById("searchDept").value.trim();
+  renderAll();
+}
+function resetFilter() {
+  document.getElementById("searchDept").value = "";
+  deptFilter = "";
+  renderAll();
+}
+
+function renderStats() {
+  const ins = inspections.filter(x => matchDept(x.dept));
+  const allDates = [...new Set(inspections.map(x => x.date))].sort();
+  const dates = [...new Set(ins.map(x => x.date))].sort();
+  document.getElementById("stCount").innerText = deptFilter ? dates.length : allDates.length;
+  document.getElementById("stDept").innerText = new Set(ins.map(x => x.dept)).size;
+  document.getElementById("stViol").innerText = ins.reduce((a, x) => a + violCount(x), 0);
+  const last = allDates[allDates.length - 1];
+  document.getElementById("stLast").innerText = last ? last.replace("-", ".") : "-";
+  document.getElementById("scopeText").innerText = deptFilter
+    ? `'${deptFilter}' 검색 결과 기준 (점검 차수는 위반 확인 회차)`
+    : "전체 부서 기준 · 2026년";
+}
+
+function renderHistory() {
+  const tbody = document.getElementById("historyBody");
+  const rows = inspections.filter(x => matchDept(x.dept)).sort((a, b) => b.date.localeCompare(a.date));
+
+  if (rows.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="3"><div class="empty">${inspections.length === 0
+      ? "등록된 점검 이력이 없습니다."
+      : "해당 부서의 위반 이력이 없습니다."}</div></td></tr>`;
+    return;
+  }
+
+  let html = "", prev = "";
+  rows.forEach((r, i) => {
+    if (r.date !== prev) {
+      const g = rows.filter(x => x.date === r.date);
+      html += `<tr class="group-row"><td colspan="3">${fmtMonth(r.date)} 점검<span class="gsum">${g.length}개 부서 · ${g.reduce((a, x) => a + violCount(x), 0)}건</span></td></tr>`;
+      prev = r.date;
+    }
+    const n = violCount(r);
+    // 반복 : 같은 부서의 이전 점검에서 같은 항목이 지적된 경우
+    const prior = id => inspections.filter(x => x.dept === r.dept && x.date < r.date && (x.items || {})[id]).map(x => x.date).sort().pop();
+    const reps = Object.keys(r.items || {}).filter(id => prior(id));
+    const list = Object.entries(r.items || {}).map(([id, c]) =>
+      `<div>· ${esc(itemName(id))}<span class="mark-x">${c}건</span>${prior(id) ? `<span class="badge b-rep">반복</span><span class="hint"> ${esc(prior(id).replace("-", "."))} 지적</span>` : ""}</div>`).join("");
+    html += `<tr class="row-click" onclick="toggleDetail(${i})">
+        <td>${esc(r.date.replace("-", "."))}</td>
+        <td>${esc(r.dept)}${reps.length ? `<span class="badge b-rep">반복</span>` : ""}</td>
+        <td><span class="mark-x">${n}건</span></td>
+        <td><span class="badge b-ok">현장조치</span></td>
+      </tr>
+      <tr class="detail hidden" id="detail-${i}"><td colspan="4">
+        <div class="vlist">${list}</div>
+        ${r.note ? `<div style="margin-top:8px; font-size:13px; color:var(--ink-soft); line-height:1.7;">비고 : ${esc(r.note)}</div>` : ""}
+      </td></tr>`;
+  });
+  tbody.innerHTML = html;
+}
+
+function toggleDetail(i) {
+  document.getElementById("detail-" + i).classList.toggle("hidden");
+}
+
+function photoUrl(p) {
+  if (p.startsWith("http") || p.includes("/")) return p;         // 주소·경로
+  if (/\.(jpe?g|png|webp|gif)$/i.test(p)) return PHOTO_BASE + p;  // 로컬 파일명
+  return DRIVE_IMG + p;                                           // 구글드라이브 파일 ID
+}
+
+function caseCard(c, good) {
+  return `<div class="case ${good ? "good" : ""}">
+    <div class="case-photos one"><div class="ph"><img src="${esc(photoUrl(c.photo))}" loading="lazy" alt="${esc(c.cap)}" onclick="showImage(this.src)" onerror="this.onerror=null;this.src='${esc(PHOTO_BASE + c.file)}'"><span class="cap">${esc(c.cap)}</span></div></div>
+    <div class="case-body">
+      <div class="case-title">${good ? `<span class="badge b-ok">우수사례</span>` : ""}${esc(c.title)}</div>
+      <div class="case-text">
+        ${good ? `<b>${esc(c.dept)}</b>${esc(c.desc)}` : `<b>법규·영향</b>${esc(c.law)}`}
+      </div>
+      ${good ? "" : `<div class="do-box"><span class="do-lbl">[개선필요]</span><span class="do-txt">${esc(c.how)}</span></div>`}
+    </div>
+  </div>`;
+}
+
+function renderCases() {
+  document.getElementById("caseGrid").innerHTML =
+    `<div class="case-grid">${violations.map(v => caseCard(v, false)).join("")}</div>` +
+    (goodCases.length ? `<div class="sub-head">우수사례</div><div class="case-grid">${goodCases.map(g => caseCard(g, true)).join("")}</div>` : "");
+}
+
+function renderItems() {
+  document.getElementById("itemList").innerHTML = CHECK_ITEMS.map(it => `
+    <div class="item">
+      <div class="no">${esc(it.id)}</div>
+      <div>
+        <div class="name">${esc(it.name)}</div>
+        <div class="basis">${esc(it.basis)}</div>
+      </div>
+    </div>`).join("");
+}
+
+function renderDeptList() {
+  const depts = [...new Set(inspections.map(x => x.dept))].sort();
+  document.getElementById("deptList").innerHTML = depts.map(d => `<option value="${esc(d)}">`).join("");
+}
+
+function renderAll() {
+  renderStats();
+  renderHistory();
+  renderCases();
+}
+
+function showImage(src){ document.getElementById("modalImg").src = src; document.getElementById("imgModal").style.display = "flex"; }
+function closeModal(){ document.getElementById("imgModal").style.display = "none"; }
+
+document.getElementById("searchDept").addEventListener("keydown", e => { if (e.key === "Enter") applyFilter(); });
+
+function init() {
+  renderDeptList();
+  renderItems();
+  renderAll();
+}
+
+if (INSPECTION_API) {
+  document.getElementById("historyBody").innerHTML = "<tr><td colspan='3'>로딩 중...</td></tr>";
+  fetch(INSPECTION_API + "?type=inspection")
+    .then(res => res.json())
+    .then(data => {
+      inspections = data.inspections || [];
+      violations = data.violations || [];
+    })
+    .catch(err => alert("점검 데이터를 불러오지 못했습니다. 네트워크 상태를 확인해주세요."))
+    .finally(init);
+} else {
+  init();
+}
+</script>
+
+</body>
+</html>
