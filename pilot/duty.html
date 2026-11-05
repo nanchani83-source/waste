@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1F2D3A">
+<title>당직 알림</title>
+<style>
+:root{--bg:#F2F4F7;--surface:#fff;--ink:#15202B;--soft:#5B6673;--line:#E4E8EC;--hero:#1F2D3A;--blue:#3A5A8C;--green:#2E7D5B;--red:#C62828;--amber:#A8683A}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans KR","Malgun Gothic",-apple-system,sans-serif;font-size:19px;-webkit-font-smoothing:antialiased}
+.hero{background:var(--hero);color:#fff;padding:calc(18px + env(safe-area-inset-top,0px)) 20px 40px}
+.hero-in{max-width:560px;margin:0 auto;display:flex;justify-content:space-between;align-items:center}
+.hero h1{margin:0;font-size:24px;font-weight:800}
+.hero small{font-size:15px;color:#A9B7C4}
+main{max-width:560px;margin:-26px auto 0;padding:0 14px 40px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:18px;margin-bottom:14px}
+.card.new{border:3px solid var(--amber)}
+select,input{width:100%;font:inherit;padding:14px;border:1px solid var(--line);border-radius:12px;margin:6px 0 14px}
+label{font-weight:700;font-size:16px}
+.btn{width:100%;padding:20px;border:0;border-radius:16px;color:#fff;font:inherit;font-weight:800;font-size:22px;margin-top:10px}
+.b-ack{background:var(--blue)}.b-done{background:var(--green)}.b-sub{background:#fff;color:var(--ink);border:2px solid var(--line);font-size:17px;padding:14px}
+.t{font-size:22px;font-weight:800}
+.sub{font-size:16px;color:var(--soft);margin-top:4px;line-height:1.5}
+.badge{display:inline-block;padding:3px 12px;border-radius:99px;font-size:15px;font-weight:700;color:#fff;margin-left:6px;vertical-align:middle}
+.s-접수{background:var(--amber)}.s-확인{background:var(--blue)}.s-완료{background:var(--green)}
+.err{color:var(--red);font-weight:700;font-size:16px;margin:8px 0}
+.hint{background:#FFF6E5;border:1px solid #F0D9A8;border-radius:12px;padding:12px 14px;font-size:16px;line-height:1.6;margin-bottom:14px}
+.ext a{color:var(--blue);font-weight:800;text-decoration:none}
+a.reset{color:var(--soft);font-size:14px;text-align:center;display:block;margin-top:10px}
+</style>
+</head>
+<body>
+<header class="hero"><div class="hero-in"><div><h1>당직 알림</h1><small id="who"></small></div></div></header>
+<main>
+  <!-- 등록 -->
+  <div class="card" id="reg" hidden>
+    <div class="hint" id="iosHint" hidden>📱 <b>아이폰</b>은 먼저 화면 아래 <b>공유(□↑)</b> 버튼 → <b>'홈 화면에 추가'</b>를 누른 뒤, 홈 화면의 <b>당직알림</b> 아이콘으로 다시 열어 주세요.</div>
+    <label>이름</label>
+    <select id="name"></select>
+    <label>등록코드</label>
+    <input id="pin" type="password" inputmode="numeric" placeholder="관리사무실에서 알려준 번호">
+    <button class="btn b-ack" id="regBtn">알림 켜기</button>
+    <div class="err" id="regErr"></div>
+  </div>
+
+  <!-- 평소 화면 -->
+  <div id="main" hidden>
+    <div id="list"></div>
+    <button class="btn b-sub" id="testBtn">테스트 알림 받아보기</button>
+    <div class="err" id="mainErr"></div>
+    <a href="#" class="reset" id="reset">이 폰 등록 해제</a>
+  </div>
+</main>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js"></script>
+<script src="config.js"></script>
+<script>
+const API = PILOT.API_URL;
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const store = {
+  get(k) { try { return localStorage.getItem(k) || ""; } catch (e) { return ""; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} },
+  del(k) { try { localStorage.removeItem(k); } catch (e) {} }
+};
+const focusId = new URLSearchParams(location.search).get("id");
+
+function showReg() {
+  $("reg").hidden = false; $("main").hidden = true;
+  const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const standalone = navigator.standalone || matchMedia("(display-mode: standalone)").matches;
+  $("iosHint").hidden = !(ios && !standalone);
+  fetch(API + "?action=people").then((r) => r.json()).then((r) => {
+    $("name").innerHTML = '<option value="">이름을 선택하세요</option>' + r.people.map((p) => `<option>${esc(p)}</option>`).join("");
+  }).catch(() => ($("regErr").textContent = "서버에 연결할 수 없습니다."));
+}
+
+$("regBtn").addEventListener("click", async () => {
+  $("regErr").textContent = "";
+  const name = $("name").value, pin = $("pin").value.trim();
+  if (!name || !pin) return ($("regErr").textContent = "이름과 등록코드를 입력하세요.");
+  try {
+    if (!("serviceWorker" in navigator) || !("Notification" in window)) throw new Error("이 브라우저는 알림을 지원하지 않습니다. (아이폰은 홈 화면에 추가 후 열어 주세요)");
+    const perm = await Notification.requestPermission();
+    if (perm !== "granted") throw new Error("알림이 허용되지 않았습니다. 설정에서 알림을 허용해 주세요.");
+    firebase.initializeApp(PILOT.FIREBASE);
+    const reg = await navigator.serviceWorker.register("firebase-messaging-sw.js");
+    await navigator.serviceWorker.ready;
+    const token = await firebase.messaging().getToken({ vapidKey: PILOT.VAPID, serviceWorkerRegistration: reg });
+    if (!token) throw new Error("알림 토큰을 받지 못했습니다.");
+    const r = await (await fetch(API, { method: "POST", body: JSON.stringify({
+      action: "register", name, pin, token, deviceId: store.get("deviceId") }) })).json();
+    if (!r.ok) throw new Error(r.error);
+    store.set("deviceId", r.deviceId); store.set("key", r.key); store.set("name", name);
+    showMain();
+  } catch (e) { $("regErr").textContent = e.message || String(e); }
+});
+
+function showMain() {
+  $("reg").hidden = true; $("main").hidden = false;
+  $("who").textContent = store.get("name") + "님";
+  load();
+}
+
+async function load() {
+  try {
+    const r = await (await fetch(API + "?action=duty&deviceId=" + encodeURIComponent(store.get("deviceId")) +
+      "&key=" + encodeURIComponent(store.get("key")))).json();
+    if (!r.ok) { if (r.error === "auth") { store.del("key"); return showReg(); } throw new Error(r.error); }
+    const items = r.items.sort((a, b) => (a.st === "완료") - (b.st === "완료")); // 미처리 우선
+    $("list").innerHTML = items.length ? items.map((it) => `
+      <div class="card ${it.st === "접수" ? "new" : ""}" id="r${esc(it.id)}">
+        <div class="t">${esc(it.ward)} ${esc(it.loc)}<span class="badge s-${esc(it.st)}">${esc(it.st)}</span></div>
+        <div class="sub">${esc(it.kind)} · ${esc(it.at)} 접수${it.ackAt ? " · 확인 " + esc(it.ackAt) : ""}</div>
+        ${it.memo ? `<div class="sub">메모: ${esc(it.memo)}</div>` : ""}
+        ${it.ext ? `<div class="sub ext">회신 내선 <a href="tel:${esc(it.ext)}">${esc(it.ext)}</a></div>` : ""}
+        ${it.st === "접수" ? `<button class="btn b-ack" data-a="ack" data-id="${esc(it.id)}">확인했습니다</button>` : ""}
+        ${it.st === "확인" ? `<button class="btn b-done" data-a="done" data-id="${esc(it.id)}">청소 완료</button>` : ""}
+      </div>`).join("") : '<div class="card"><div class="sub">최근 24시간 요청이 없습니다.</div></div>';
+    document.querySelectorAll("[data-a]").forEach((b) => b.addEventListener("click", () => act(b)));
+    if (focusId) { const el = $("r" + focusId); if (el) el.scrollIntoView({ behavior: "smooth", block: "center" }); }
+    $("mainErr").textContent = "";
+  } catch (e) { $("mainErr").textContent = "목록을 불러오지 못했습니다. 잠시 후 다시 시도됩니다."; }
+}
+
+async function act(b) {
+  b.disabled = true;
+  try {
+    const r = await (await fetch(API, { method: "POST", body: JSON.stringify({
+      action: b.dataset.a, id: b.dataset.id, deviceId: store.get("deviceId"), key: store.get("key") }) })).json();
+    if (!r.ok) throw new Error(r.error);
+  } catch (e) { $("mainErr").textContent = "처리 실패: " + e.message; }
+  load();
+}
+
+$("testBtn").addEventListener("click", async () => {
+  $("mainErr").textContent = "";
+  const r = await (await fetch(API, { method: "POST", body: JSON.stringify({
+    action: "test", deviceId: store.get("deviceId"), key: store.get("key") }) })).json();
+  $("mainErr").textContent = r.ok ? "잠시 후 알림이 오면 정상입니다." : "발송 실패: " + (r.error || "");
+});
+$("reset").addEventListener("click", (e) => {
+  e.preventDefault();
+  if (!confirm("이 폰의 등록을 해제할까요?")) return;
+  ["deviceId", "key", "name"].forEach(store.del); showReg();
+});
+
+if (!API) { $("reg").hidden = false; $("regErr").textContent = "설정(config.js)이 아직 입력되지 않았습니다."; }
+else if (store.get("deviceId") && store.get("key")) showMain();
+else showReg();
+setInterval(() => { if (!$("main").hidden && !document.hidden) load(); }, 30000);
+document.addEventListener("visibilitychange", () => { if (!document.hidden && !$("main").hidden) load(); });
+</script>
+</body>
+</html>

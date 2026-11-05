@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>병동 청소 요청</title>
+<style>
+:root{--bg:#F2F4F7;--surface:#fff;--ink:#15202B;--soft:#5B6673;--faint:#98A2AE;--line:#E4E8EC;--hero:#1F2D3A;--blue:#3A5A8C;--red:#C62828;--green:#2E7D5B;--amber:#A8683A}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans KR","Malgun Gothic",-apple-system,sans-serif;-webkit-font-smoothing:antialiased}
+.hero{background:var(--hero);color:#fff;padding:calc(22px + env(safe-area-inset-top,0px)) 20px 52px}
+.hero-in{max-width:560px;margin:0 auto}
+.hero small{color:#A9B7C4;font-weight:700;letter-spacing:.12em;font-size:12px}
+.hero h1{margin:6px 0 0;font-size:26px;font-weight:800;letter-spacing:-.02em}
+main{max-width:560px;margin:-36px auto 0;padding:0 16px 32px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:18px;margin-bottom:14px}
+label{display:block;font-size:14px;font-weight:700;margin:14px 0 6px}
+label:first-child{margin-top:0}
+select,input,textarea{width:100%;font:inherit;font-size:17px;padding:13px 14px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink)}
+.chips{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.chip{position:relative;margin:0!important}
+.chip input{position:absolute;opacity:0}
+.chip span{display:flex;align-items:center;justify-content:center;text-align:center;min-height:56px;padding:8px;border:2px solid var(--line);border-radius:14px;font-weight:700;font-size:15px;line-height:1.3}
+.chip input:checked+span{border-color:var(--blue);background:#EAF0F9;color:var(--blue)}
+.note{font-size:13px;color:var(--soft);line-height:1.6;margin-top:10px}
+.warn{color:var(--red);font-weight:700}
+.btn{width:100%;margin-top:18px;padding:17px;border:0;border-radius:14px;background:var(--blue);color:#fff;font:inherit;font-size:18px;font-weight:800}
+.btn:disabled{opacity:.5}
+.err{color:var(--red);font-weight:700;margin-top:10px;font-size:14px}
+h2{font-size:16px;margin:0 0 10px}
+.item{border-top:1px solid var(--line);padding:12px 0}
+.item:first-of-type{border-top:0}
+.item b{font-size:15px}
+.badge{display:inline-block;padding:3px 10px;border-radius:99px;font-size:13px;font-weight:700;color:#fff;margin-left:6px}
+.s-접수{background:var(--amber)}.s-확인{background:var(--blue)}.s-완료{background:var(--green)}.s-취소{background:var(--faint)}
+.sub{font-size:13px;color:var(--soft);margin-top:4px}
+.link{background:none;border:0;color:var(--red);font:inherit;font-size:13px;text-decoration:underline;padding:0;margin-top:4px}
+.ok{background:#EAF6F0;border:1px solid #BFE0CF;color:#1C5A3E;border-radius:12px;padding:12px 14px;margin-top:14px;font-weight:700;font-size:15px}
+footer{text-align:center;font-size:13px;color:var(--soft);padding:6px 16px 28px}
+</style>
+</head>
+<body>
+<header class="hero"><div class="hero-in"><small>KNUH · 시범운영</small><h1>병동 청소 요청</h1></div></header>
+<main>
+  <div class="card" id="form">
+    <label for="ward">병동</label>
+    <select id="ward"><option value="">불러오는 중…</option></select>
+
+    <label>종류</label>
+    <div class="chips" id="kinds"></div>
+
+    <label for="loc">위치 <span style="font-weight:400;color:var(--soft)">(병실·장소)</span></label>
+    <input id="loc" maxlength="40" placeholder="예: 412호, 복도 끝">
+
+    <label for="ext">회신 내선</label>
+    <input id="ext" type="tel" inputmode="numeric" maxlength="15" placeholder="예: 4012">
+
+    <label for="memo">메모 <span style="font-weight:400;color:var(--soft)">(선택)</span></label>
+    <textarea id="memo" rows="2" maxlength="100"></textarea>
+
+    <p class="note"><span class="warn">환자 이름·등록번호 등 개인정보는 입력하지 마세요.</span><br>
+    당직자가 확인하지 않으면 자동으로 다시 알리고, 15분이 지나면 관리사무실로 전달됩니다.
+    <span id="office"></span></p>
+
+    <button class="btn" id="send">청소 요청 보내기</button>
+    <div class="err" id="err"></div>
+    <div class="ok" id="okmsg" hidden></div>
+  </div>
+
+  <div class="card">
+    <h2>우리 병동 오늘 요청</h2>
+    <div id="list"><span class="sub">병동을 선택하면 표시됩니다.</span></div>
+  </div>
+  <footer>시범운영 중입니다. 급할 때는 평소처럼 내선전화도 함께 이용해 주세요.</footer>
+</main>
+
+<script src="config.js"></script>
+<script>
+const API = PILOT.API_URL;
+const $ = (id) => document.getElementById(id);
+let kind = "";
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const store = {
+  get(k) { try { return localStorage.getItem(k) || ""; } catch (e) { return ""; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+};
+
+async function init() {
+  if (!API) { $("err").textContent = "설정(config.js)이 아직 입력되지 않았습니다."; return; }
+  try {
+    const r = await (await fetch(API + "?action=wards")).json();
+    $("ward").innerHTML = '<option value="">병동을 선택하세요</option>' + r.wards.map((w) => `<option>${esc(w)}</option>`).join("");
+    $("kinds").innerHTML = r.kinds.map((k, i) =>
+      `<label class="chip"><input type="radio" name="kind" value="${esc(k)}"><span>${esc(k)}</span></label>`).join("");
+    document.querySelectorAll('input[name="kind"]').forEach((el) => el.addEventListener("change", () => (kind = el.value)));
+    if (r.office) $("office").textContent = " 급하면 관리사무실 ☎ " + r.office;
+    const saved = store.get("ward");
+    if (saved && r.wards.includes(saved)) { $("ward").value = saved; refresh(); }
+    $("ext").value = store.get("ext");
+  } catch (e) { $("err").textContent = "서버에 연결할 수 없습니다. 내선전화로 요청해 주세요."; }
+}
+
+$("ward").addEventListener("change", () => { store.set("ward", $("ward").value); refresh(); });
+
+$("send").addEventListener("click", async () => {
+  $("err").textContent = ""; $("okmsg").hidden = true;
+  const ward = $("ward").value, loc = $("loc").value.trim();
+  if (!ward) return ($("err").textContent = "병동을 선택하세요.");
+  if (!kind) return ($("err").textContent = "종류를 선택하세요.");
+  if (!loc) return ($("err").textContent = "위치를 입력하세요.");
+  $("send").disabled = true; $("send").textContent = "보내는 중…";
+  try {
+    const r = await (await fetch(API, { method: "POST", body: JSON.stringify({
+      action: "submit", ward, kind, loc, ext: $("ext").value.trim(), memo: $("memo").value.trim() }) })).json();
+    if (!r.ok) throw new Error(r.error);
+    store.set("ext", $("ext").value.trim());
+    $("okmsg").hidden = false;
+    $("okmsg").textContent = (r.to === "당직자" ? "당직자에게" : "관리사무실로") + " 요청이 전달되었습니다. 아래에서 처리 상태를 확인하세요.";
+    $("loc").value = ""; $("memo").value = "";
+    refresh();
+  } catch (e) { $("err").textContent = (e.message || "전송 실패") + " 전송이 안 되면 내선전화로 요청해 주세요."; }
+  $("send").disabled = false; $("send").textContent = "청소 요청 보내기";
+});
+
+async function refresh() {
+  const ward = $("ward").value; if (!ward) return;
+  try {
+    const r = await (await fetch(API + "?action=status&ward=" + encodeURIComponent(ward))).json();
+    if (!r.items.length) { $("list").innerHTML = '<span class="sub">오늘 요청 내역이 없습니다.</span>'; return; }
+    $("list").innerHTML = r.items.map((it) => {
+      let sub = "접수 " + it.at;
+      if (it.ackAt) sub += " · 확인 " + it.ackAt;
+      if (it.doneAt) sub += " · 완료 " + it.doneAt;
+      if (it.esc && it.st === "접수") sub += " · 관리사무실에 전달됨";
+      return `<div class="item"><b>${esc(it.loc)}</b> · ${esc(it.kind)}<span class="badge s-${esc(it.st)}">${esc(it.st)}</span>
+        <div class="sub">${esc(sub)}</div>
+        ${it.st === "접수" ? `<button class="link" data-id="${esc(it.id)}">요청 취소</button>` : ""}</div>`;
+    }).join("");
+    document.querySelectorAll(".link").forEach((b) => b.addEventListener("click", async () => {
+      if (!confirm("이 요청을 취소할까요?")) return;
+      await fetch(API, { method: "POST", body: JSON.stringify({ action: "cancel", id: b.dataset.id, ward }) });
+      refresh();
+    }));
+  } catch (e) {}
+}
+
+init();
+setInterval(refresh, 30000);
+document.addEventListener("visibilitychange", () => { if (!document.hidden) refresh(); });
+</script>
+</body>
+</html>
