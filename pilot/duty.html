@@ -105,6 +105,28 @@ function showMain() {
   $("reg").hidden = true; $("main").hidden = false;
   $("who").textContent = store.get("name") + "님";
   load();
+  initForeground();
+}
+
+// 화면이 켜져 있을 때 오는 알림은 FCM이 자동으로 띄우지 않으므로 직접 알림창을 보여준다
+let fgReady = false;
+async function initForeground() {
+  if (fgReady) return;
+  try {
+    if (!("serviceWorker" in navigator) || !("Notification" in window) || Notification.permission !== "granted") return;
+    if (!firebase.apps.length) firebase.initializeApp(PILOT.FIREBASE);
+    const reg = await navigator.serviceWorker.getRegistration();
+    if (!reg) return;
+    firebase.messaging().onMessage((p) => {
+      const n = p.notification || {};
+      reg.showNotification(n.title || "청소 요청", {
+        body: n.body || "", tag: (p.data && p.data.tag) || "fg", icon: "icon.svg",
+        renotify: true, requireInteraction: true, vibrate: [300, 150, 300, 150, 300]
+      });
+      load();
+    });
+    fgReady = true;
+  } catch (e) {}
 }
 
 async function load() {
