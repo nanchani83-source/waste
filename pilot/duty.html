@@ -6,52 +6,108 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#1F2D3A">
+<meta name="theme-color" content="#0F5E5B">
 <title>당직 알림</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#F2F4F7;--surface:#fff;--ink:#15202B;--soft:#5B6673;--line:#E4E8EC;--hero:#1F2D3A;--blue:#3A5A8C;--green:#2E7D5B;--red:#C62828;--amber:#A8683A}
+:root{
+  --bg:#F3F5F4; --card:#fff; --ink:#122220; --soft:#566865; --faint:#8A9A97; --line:#DCE3E1;
+  --brand:#0F5E5B; --brand-deep:#0B4745; --brand-soft:#E2F0EE;
+  --wait:#B4540A; --wait-soft:#FFF0DF; --ack:#2155C4; --done:#177245; --err:#B3261E;
+}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans KR","Malgun Gothic",-apple-system,sans-serif;font-size:19px;-webkit-font-smoothing:antialiased}
-.hero{background:var(--hero);color:#fff;padding:calc(18px + env(safe-area-inset-top,0px)) 20px 40px}
-.hero-in{max-width:560px;margin:0 auto;display:flex;justify-content:space-between;align-items:center}
-.hero h1{margin:0;font-size:24px;font-weight:800}
-.hero small{font-size:15px;color:#A9B7C4}
-main{max-width:560px;margin:-26px auto 0;padding:0 14px 40px}
-.card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:18px;margin-bottom:14px}
-.card.new{border:3px solid var(--amber)}
-select,input{width:100%;font:inherit;padding:14px;border:1px solid var(--line);border-radius:12px;margin:6px 0 14px}
-label{font-weight:700;font-size:16px}
-.btn{width:100%;padding:20px;border:0;border-radius:16px;color:#fff;font:inherit;font-weight:800;font-size:22px;margin-top:10px}
-.b-ack{background:var(--blue)}.b-done{background:var(--green)}.b-sub{background:#fff;color:var(--ink);border:2px solid var(--line);font-size:17px;padding:14px}
-.t{font-size:22px;font-weight:800}
-.sub{font-size:16px;color:var(--soft);margin-top:4px;line-height:1.5}
-.badge{display:inline-block;padding:3px 12px;border-radius:99px;font-size:15px;font-weight:700;color:#fff;margin-left:6px;vertical-align:middle}
-.s-접수{background:var(--amber)}.s-확인{background:var(--blue)}.s-완료{background:var(--green)}
-.err{color:var(--red);font-weight:700;font-size:16px;margin:8px 0}
-.hint{background:#FFF6E5;border:1px solid #F0D9A8;border-radius:12px;padding:12px 14px;font-size:16px;line-height:1.6;margin-bottom:14px}
-.ext a{color:var(--blue);font-weight:800;text-decoration:none}
-a.reset{color:var(--soft);font-size:14px;text-align:center;display:block;margin-top:10px}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans KR","Malgun Gothic",-apple-system,sans-serif;font-size:18px;-webkit-font-smoothing:antialiased;line-height:1.5}
+:focus-visible{outline:3px solid #7FB8B3;outline-offset:2px}
+
+/* 상단: 누구인지 + 처리할 건수가 가장 크게 */
+.top{background:var(--brand);color:#fff;padding:calc(16px + env(safe-area-inset-top,0px)) 20px 22px}
+.top-in{max-width:520px;margin:0 auto}
+.who{font-size:15px;color:#CFE6E3;font-weight:500}
+.big{display:flex;align-items:baseline;gap:10px;margin-top:2px}
+.big strong{font-size:44px;font-weight:800;line-height:1.1;letter-spacing:-.02em}
+.big span{font-size:19px;font-weight:700}
+.big.zero strong{font-size:28px}
+
+main{max-width:520px;margin:0 auto;padding:16px 14px 40px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:14px}
+
+/* 요청 카드 */
+.req{position:relative;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 18px 18px 22px;margin-bottom:14px;overflow:hidden}
+.req::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:var(--line)}
+.req.w::before{background:var(--wait)}
+.req.a::before{background:var(--ack)}
+.req.d::before{background:var(--done)}
+.req.w{border-color:#F0C9A0;background:#FFFAF4}
+.req-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.dept{font-size:24px;font-weight:800;letter-spacing:-.02em;line-height:1.25}
+.loc{font-size:20px;font-weight:700;margin-top:2px}
+.tag{flex:none;font-size:14px;font-weight:800;padding:4px 11px;border-radius:99px;color:#fff}
+.tag.w{background:var(--wait)}.tag.a{background:var(--ack)}.tag.d{background:var(--done)}
+.meta{margin-top:8px;font-size:16px;color:var(--soft)}
+.meta b{color:var(--ink);font-weight:700}
+.memo{margin-top:6px;font-size:16px;color:var(--soft)}
+.call{display:inline-flex;align-items:center;gap:8px;margin-top:10px;min-height:48px;padding:0 16px;border:1.5px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);font-weight:800;font-size:18px;text-decoration:none}
+.call svg{width:20px;height:20px;stroke:var(--brand);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+.btn{width:100%;min-height:64px;border:0;border-radius:14px;color:#fff;font:inherit;font-weight:800;font-size:22px;margin-top:14px;transition:transform .08s,filter .12s}
+.btn:active{transform:scale(.985);filter:brightness(.92)}
+.btn:disabled{opacity:.55}
+.b-ack{background:var(--ack)}.b-done{background:var(--done)}.b-main{background:var(--brand)}
+.b-sub{background:#fff;color:var(--ink);border:1.5px solid var(--line);font-size:17px;min-height:54px;margin-top:6px}
+
+.empty{padding:34px 12px;text-align:center;color:var(--soft);font-size:17px}
+.empty b{display:block;color:var(--ink);font-size:20px;margin-bottom:4px}
+
+details.dn{margin:6px 0 14px}
+details.dn summary{cursor:pointer;font-weight:800;font-size:16px;color:var(--soft);padding:10px 4px;list-style:none}
+details.dn summary::-webkit-details-marker{display:none}
+details.dn summary::before{content:"▸ ";}
+details.dn[open] summary::before{content:"▾ ";}
+.req.d{padding:14px 16px 14px 22px;margin-bottom:8px}
+.req.d .dept{font-size:18px}.req.d .loc{font-size:16px}
+
+/* 등록 */
+.lab{display:block;font-weight:700;font-size:16px;margin:0 0 6px}
+select,input{width:100%;font:inherit;font-size:19px;min-height:56px;padding:12px 14px;border:1.5px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);margin-bottom:16px}
+select:focus,input:focus{border-color:var(--brand);outline:3px solid #BFE0DC;outline-offset:0}
+.hint{background:var(--wait-soft);border:1px solid #F0C9A0;border-radius:12px;padding:12px 14px;font-size:16px;line-height:1.6;margin-bottom:16px}
+.err{color:var(--err);font-weight:700;font-size:16px;margin:8px 0}
+.ok{color:var(--done);font-weight:700;font-size:16px;margin:8px 0}
+h2.reg-t{margin:0 0 4px;font-size:22px;font-weight:800}
+p.reg-s{margin:0 0 18px;color:var(--soft);font-size:16px}
+a.reset{display:block;text-align:center;color:var(--soft);font-size:15px;margin-top:18px;padding:10px}
+
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
 <body>
-<header class="hero"><div class="hero-in"><div><h1>당직 알림</h1><small id="who"></small></div></div></header>
+<header class="top"><div class="top-in">
+  <div class="who" id="who">당직 알림</div>
+  <div class="big" id="big" hidden><strong id="bigN">0</strong><span id="bigT">건 처리 대기</span></div>
+</div></header>
+
 <main>
   <!-- 등록 -->
-  <div class="card" id="reg" hidden>
-    <div class="hint" id="iosHint" hidden>📱 <b>아이폰</b>은 먼저 화면 아래 <b>공유(□↑)</b> 버튼 → <b>'홈 화면에 추가'</b>를 누른 뒤, 홈 화면의 <b>당직알림</b> 아이콘으로 다시 열어 주세요.</div>
-    <label>이름</label>
+  <section class="card" id="reg" hidden>
+    <h2 class="reg-t">이 폰에서 알림 받기</h2>
+    <p class="reg-s">한 번만 등록하면 당직일에 청소 요청 알림이 옵니다.</p>
+    <div class="hint" id="iosHint" hidden><b>아이폰</b>은 먼저 화면 아래 <b>공유(□↑)</b> 버튼 → <b>'홈 화면에 추가'</b>를 누른 뒤, 홈 화면의 <b>당직알림</b> 아이콘으로 다시 열어 주세요.</div>
+    <label class="lab" for="name">이름</label>
     <select id="name"></select>
-    <label>등록코드</label>
-    <input id="pin" type="password" inputmode="numeric" placeholder="관리사무실에서 알려준 번호">
-    <button class="btn b-ack" id="regBtn">알림 켜기</button>
-    <div class="err" id="regErr"></div>
-  </div>
+    <label class="lab" for="pin">등록코드</label>
+    <input id="pin" type="password" inputmode="numeric" placeholder="관리사무실에서 알려준 번호" autocomplete="off">
+    <button class="btn b-main" id="regBtn">알림 켜기</button>
+    <div class="err" id="regErr" role="alert"></div>
+  </section>
 
   <!-- 평소 화면 -->
   <div id="main" hidden>
     <div id="list"></div>
     <button class="btn b-sub" id="testBtn">테스트 알림 받아보기</button>
-    <div class="err" id="mainErr"></div>
+    <div class="err" id="mainErr" role="alert"></div>
     <a href="#" class="reset" id="reset">이 폰 등록 해제</a>
   </div>
 </main>
@@ -69,9 +125,11 @@ const store = {
   del(k) { try { localStorage.removeItem(k); } catch (e) {} }
 };
 const focusId = new URLSearchParams(location.search).get("id");
+const PHONE = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg>';
 
 function showReg() {
-  $("reg").hidden = false; $("main").hidden = true;
+  $("reg").hidden = false; $("main").hidden = true; $("big").hidden = true;
+  $("who").textContent = "당직 알림";
   const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
   const standalone = navigator.standalone || matchMedia("(display-mode: standalone)").matches;
   $("iosHint").hidden = !(ios && !standalone);
@@ -129,25 +187,41 @@ async function initForeground() {
   } catch (e) {}
 }
 
+function card(it) {
+  const cls = it.st === "접수" ? "w" : it.st === "확인" ? "a" : "d";
+  const label = it.st === "접수" ? "대기" : it.st === "확인" ? "처리 중" : "완료";
+  if (cls === "d") {
+    return `<div class="req d" id="r${esc(it.id)}"><div class="req-head"><div><div class="dept">${esc(it.ward)} ${esc(it.loc)}</div>
+      <div class="meta">${esc(it.kind)} · ${esc(it.at)}</div></div><span class="tag d">${label}</span></div></div>`;
+  }
+  return `<div class="req ${cls}" id="r${esc(it.id)}">
+    <div class="req-head"><div><div class="dept">${esc(it.ward)}</div><div class="loc">${esc(it.loc)}</div></div><span class="tag ${cls}">${label}</span></div>
+    <div class="meta"><b>${esc(it.kind)}</b> · ${esc(it.at)} 접수${it.ackAt ? " · " + esc(it.ackAt) + " 확인" : ""}</div>
+    ${it.memo ? `<div class="memo">메모: ${esc(it.memo)}</div>` : ""}
+    ${it.ext ? `<a class="call" href="tel:${esc(it.ext)}">${PHONE}회신 내선 ${esc(it.ext)}</a>` : ""}
+    ${it.st === "접수" ? `<button class="btn b-ack" data-a="ack" data-id="${esc(it.id)}">확인했습니다</button>` : ""}
+    ${it.st === "확인" ? `<button class="btn b-done" data-a="done" data-id="${esc(it.id)}">청소 완료</button>` : ""}
+  </div>`;
+}
+
 async function load() {
   try {
     const r = await (await fetch(API + "?action=duty&deviceId=" + encodeURIComponent(store.get("deviceId")) +
       "&key=" + encodeURIComponent(store.get("key")))).json();
     if (!r.ok) { if (r.error === "auth") { store.del("key"); return showReg(); } throw new Error(r.error); }
-    const items = r.items.sort((a, b) => (a.st === "완료") - (b.st === "완료")); // 미처리 우선
-    $("list").innerHTML = items.length ? items.map((it) => `
-      <div class="card ${it.st === "접수" ? "new" : ""}" id="r${esc(it.id)}">
-        <div class="t">${esc(it.ward)} ${esc(it.loc)}<span class="badge s-${esc(it.st)}">${esc(it.st)}</span></div>
-        <div class="sub">${esc(it.kind)} · ${esc(it.at)} 접수${it.ackAt ? " · 확인 " + esc(it.ackAt) : ""}</div>
-        ${it.memo ? `<div class="sub">메모: ${esc(it.memo)}</div>` : ""}
-        ${it.ext ? `<div class="sub ext">회신 내선 <a href="tel:${esc(it.ext)}">${esc(it.ext)}</a></div>` : ""}
-        ${it.st === "접수" ? `<button class="btn b-ack" data-a="ack" data-id="${esc(it.id)}">확인했습니다</button>` : ""}
-        ${it.st === "확인" ? `<button class="btn b-done" data-a="done" data-id="${esc(it.id)}">청소 완료</button>` : ""}
-      </div>`).join("") : '<div class="card"><div class="sub">최근 24시간 요청이 없습니다.</div></div>';
+    const open = r.items.filter((it) => it.st !== "완료").sort((a, b) => (a.st === "확인") - (b.st === "확인"));
+    const done = r.items.filter((it) => it.st === "완료");
+    const waiting = open.length;
+    $("big").hidden = false; $("big").classList.toggle("zero", !waiting);
+    $("bigN").textContent = waiting ? waiting : "처리할 요청이 없습니다";
+    $("bigT").textContent = waiting ? "건 처리 대기" : "";
+    $("list").innerHTML =
+      (open.length ? open.map(card).join("") : '<div class="empty"><b>새 요청을 기다리는 중입니다</b>요청이 오면 알림이 울립니다.</div>') +
+      (done.length ? `<details class="dn"><summary>오늘 완료 ${done.length}건</summary>${done.map(card).join("")}</details>` : "");
     document.querySelectorAll("[data-a]").forEach((b) => b.addEventListener("click", () => act(b)));
     if (focusId) { const el = $("r" + focusId); if (el) el.scrollIntoView({ behavior: "smooth", block: "center" }); }
     $("mainErr").textContent = "";
-  } catch (e) { $("mainErr").textContent = "목록을 불러오지 못했습니다. 잠시 후 다시 시도됩니다."; }
+  } catch (e) { $("mainErr").textContent = "목록을 불러오지 못했습니다. 잠시 후 다시 시도합니다."; }
 }
 
 async function act(b) {
@@ -156,15 +230,16 @@ async function act(b) {
     const r = await (await fetch(API, { method: "POST", body: JSON.stringify({
       action: b.dataset.a, id: b.dataset.id, deviceId: store.get("deviceId"), key: store.get("key") }) })).json();
     if (!r.ok) throw new Error(r.error);
-  } catch (e) { $("mainErr").textContent = "처리 실패: " + e.message; }
+  } catch (e) { $("mainErr").textContent = "처리하지 못했습니다: " + e.message; }
   load();
 }
 
 $("testBtn").addEventListener("click", async () => {
-  $("mainErr").textContent = "";
+  $("mainErr").className = "err"; $("mainErr").textContent = "";
   const r = await (await fetch(API, { method: "POST", body: JSON.stringify({
     action: "test", deviceId: store.get("deviceId"), key: store.get("key") }) })).json();
-  $("mainErr").textContent = r.ok ? "잠시 후 알림이 오면 정상입니다." : "발송 실패: " + (r.error || "");
+  $("mainErr").className = r.ok ? "ok" : "err";
+  $("mainErr").textContent = r.ok ? "테스트 알림을 보냈습니다. 잠시 후 알림이 오면 정상입니다." : "발송하지 못했습니다: " + (r.error || "");
 });
 $("reset").addEventListener("click", (e) => {
   e.preventDefault();
