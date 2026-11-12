@@ -60,6 +60,24 @@ footer { text-align:center; font-size:15px; font-weight:500; color:var(--ink-sof
 footer b { color:var(--ink); font-weight:800; }
 .copy { margin-top:8px; font-size:12px; font-weight:400; color:var(--ink-faint); }
 
+/* 안내 팝업 */
+.pop-back { position:fixed; inset:0; z-index:100; display:flex; align-items:center; justify-content:center; padding:20px; background:rgba(21,32,43,.5); backdrop-filter:blur(3px); -webkit-backdrop-filter:blur(3px); }
+.pop-back[hidden] { display:none; }
+.pop { position:relative; width:100%; max-width:340px; background:var(--surface); border-radius:18px; overflow:hidden; box-shadow:0 24px 48px -16px rgba(21,32,43,.55); animation:popIn .28s cubic-bezier(.2,.8,.2,1); }
+@keyframes popIn { from { opacity:0; transform:translateY(14px) scale(.96); } to { opacity:1; transform:none; } }
+.pop-top { padding:20px 20px 16px; text-align:center; border-top:4px solid var(--orange); }
+.pop-icon { width:46px; height:46px; margin:0 auto 14px; border-radius:14px; background:rgba(168,104,58,.12); color:var(--orange); display:flex; align-items:center; justify-content:center; }
+.pop-tag { display:inline-block; font-size:12px; font-weight:700; letter-spacing:.1em; color:var(--orange); margin-bottom:6px; }
+.pop-title { margin:0 0 10px; font-size:22px; font-weight:800; letter-spacing:-0.02em; color:var(--ink); }
+.pop-period { display:inline-block; margin:0; padding:8px 14px; border-radius:10px; background:var(--bg); font-size:17px; font-weight:800; letter-spacing:-0.03em; color:var(--hero); white-space:nowrap; }
+.pop-warn { margin:10px 0 0; font-size:12px; line-height:1.5; color:var(--ink-faint); }
+.pop-warn b { color:var(--red); font-weight:700; }
+.pop-foot { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:9px 16px; border-top:1px solid var(--line); }
+.pop-skip { display:flex; align-items:center; gap:8px; font-size:13px; color:var(--ink-soft); cursor:pointer; user-select:none; }
+.pop-skip input { width:17px; height:17px; accent-color:var(--orange); }
+.pop-close { border:0; background:var(--hero); color:#fff; font:inherit; font-size:13px; font-weight:700; padding:7px 18px; border-radius:9px; cursor:pointer; transition:transform .1s; }
+.pop-close:active { transform:scale(.96); }
+
 /* 태블릿·PC: 3열 세로 타일 */
 @media (min-width: 640px) {
   .hero h1 { font-size:32px; }
@@ -114,6 +132,7 @@ footer b { color:var(--ink); font-weight:800; }
       공지사항
     </div>
     <ul>
+      <li><span class="red">(지도점검)</span> <b>11월 16일(월) ~ 27일(금)</b></li>
       <li>2026년 병원운영계획 : 의료폐기물 감축, 0.68kg/인</li>
       <li>의료폐기물 관련 궁금한점 <b>분리배출 가이드</b>에서 확인</li>
       <li><span class="red">(분리배출 철저)</span> 의료소모품 포장지는 일반쓰레기</li>
@@ -140,7 +159,47 @@ const LINKS = {
 Object.keys(LINKS).forEach(k => {
   document.getElementById("link-" + k).href = LINKS[k];
 });
+// ===== 지도점검 안내 팝업 =====
+document.addEventListener("DOMContentLoaded", function () {
+  const KEY = "wastePop_inspection_2026_11";
+  const END = new Date(2026, 10, 27, 23, 59, 59);   // 11/27 이후 자동 미노출
+  const DAYS = 7;                                    // 보지 않기 유지 기간
+  const pop = document.getElementById("notice-pop");
+  const chk = document.getElementById("pop-skip");
+  const btn = document.getElementById("pop-close");
+  const force = location.search.indexOf("force") > -1; // 미리보기용: ?force
+
+  function getSkip() { try { return Number(localStorage.getItem(KEY)) || 0; } catch (e) { return 0; } }
+  function setSkip(v) { try { localStorage.setItem(KEY, String(v)); } catch (e) {} }
+  function close() {
+    if (chk.checked) setSkip(Date.now() + DAYS * 24 * 60 * 60 * 1000);
+    pop.hidden = true;
+    document.removeEventListener("keydown", onKey);
+  }
+  function onKey(e) { if (e.key === "Escape") close(); }
+
+  if (!force && (Date.now() > END || getSkip() > Date.now())) return;
+  pop.hidden = false;
+  btn.focus();
+  btn.addEventListener("click", close);
+  pop.addEventListener("click", function (e) { if (e.target === pop) close(); });
+  document.addEventListener("keydown", onKey);
+});
 </script>
+
+<div class="pop-back" id="notice-pop" role="dialog" aria-modal="true" aria-labelledby="pop-title" hidden>
+  <div class="pop">
+    <div class="pop-top">
+      <h2 class="pop-title" id="pop-title">의료폐기물 지도점검</h2>
+      <p class="pop-period">11월 16일(월) ~ 27일(금)</p>
+      <p class="pop-warn"><b>동일 위반사례 발생 시</b> 시정조치 확인서를 징구합니다.</p>
+    </div>
+    <div class="pop-foot">
+      <label class="pop-skip"><input type="checkbox" id="pop-skip"> 일주일간 보지 않기</label>
+      <button type="button" class="pop-close" id="pop-close">닫기</button>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>
