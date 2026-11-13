@@ -3,7 +3,7 @@
   "name": "청소 요청",
   "short_name": "청소요청",
   "start_url": "clean.html",
-  "scope": "./",
+  "scope": "clean.html",
   "display": "standalone",
   "background_color": "#F2F4F7",
   "theme_color": "#0F5E5B",
