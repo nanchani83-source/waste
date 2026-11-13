@@ -121,6 +121,11 @@ footer{text-align:center;font-size:12.5px;color:var(--soft);padding:6px 20px 0}
     <ul id="noticeList"></ul>
   </section>
 
+  <section class="notice-card" id="closed" role="status" hidden style="background:#FDECEC;border-color:#F3C4C4">
+    <h2 style="color:#B3261E">지금은 요청 가능한 시간이 아닙니다</h2>
+    <ul id="schedList"></ul>
+  </section>
+
   <section class="card" aria-label="요청 작성">
     <div class="field">
       <label class="lab" for="ward">부서명</label>
@@ -169,7 +174,7 @@ footer{text-align:center;font-size:12.5px;color:var(--soft);padding:6px 20px 0}
 <script>
 const API = PILOT.API_URL;
 const $ = (id) => document.getElementById(id);
-let kind = "";
+let kind = "", closedNow = false;
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const store = {
   get(k) { try { return localStorage.getItem(k) || ""; } catch (e) { return ""; } },
@@ -198,6 +203,13 @@ async function init() {
     const ns = (r.notices || []).filter(Boolean);
     $("noticeList").innerHTML = ns.map((n) => `<li>${esc(n)}</li>`).join("");
     $("notices").hidden = !ns.length;
+    // 요청 가능 시간(평일/토요일/일요일·공휴일 당직 시간)에만 전송 가능
+    if (r.hours && !r.hours.open) {
+      $("schedList").innerHTML = r.hours.schedule.map((s) => `<li>${esc(s)}</li>`).join("");
+      $("closed").hidden = false;
+      $("send").disabled = true; $("send").textContent = "요청 가능 시간이 아닙니다";
+      closedNow = true;
+    }
     const saved = store.get("ward");
     if (saved && r.wards.includes(saved)) { $("ward").value = saved; refresh(); }
     $("ext").value = store.get("ext");
@@ -224,7 +236,7 @@ $("send").addEventListener("click", async () => {
     refresh();
     setTimeout(() => ($("okmsg").hidden = true), 6000);
   } catch (e) { $("err").textContent = (e.message || "전송하지 못했습니다.") + " 안 되면 내선전화로 요청해 주세요."; }
-  $("send").disabled = false; $("send").textContent = "청소 요청 보내기";
+  $("send").disabled = closedNow; $("send").textContent = closedNow ? "요청 가능 시간이 아닙니다" : "청소 요청 보내기";
 });
 
 async function refresh() {
