@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#0F5E5B">
-<title>청소 요청</title>
+<title>Request a Cleaning</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap" rel="stylesheet">
@@ -23,8 +23,19 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans KR","
 /* 상단: 작게, 이름과 상태만 */
 .top{background:var(--brand);color:#fff;padding:calc(14px + env(safe-area-inset-top,0px)) 20px 14px}
 .top-in{max-width:520px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px}
-.top h1{margin:0;font-size:20px;font-weight:800;letter-spacing:-.02em}
-.pill{font-size:12px;font-weight:700;padding:4px 10px;border-radius:99px;background:rgba(255,255,255,.16);color:#E6F3F1}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.mark{flex:none;width:30px;height:30px;border-radius:9px;background:rgba(255,255,255,.16);display:flex;align-items:center;justify-content:center}
+.mark svg{width:20px;height:20px;fill:#fff}
+.top h1{margin:0;font-size:20px;font-weight:800;letter-spacing:-.01em;white-space:nowrap}
+.pill{flex:none;font-size:12px;font-weight:800;letter-spacing:.08em;padding:4px 10px;border-radius:99px;background:#fff;color:var(--brand-deep)}
+
+/* 공지 */
+.notice-card{background:var(--brand-soft);border:1px solid #BFE0DC;border-radius:var(--r);padding:14px 16px;margin-bottom:14px}
+.notice-card h2{display:flex;align-items:center;gap:8px;margin:0 0 6px;font-size:15px;font-weight:800;color:var(--brand-deep)}
+.notice-card h2 svg{width:18px;height:18px;stroke:var(--brand);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.notice-card ul{margin:0;padding:0;list-style:none}
+.notice-card li{position:relative;padding-left:14px;font-size:14.5px;line-height:1.65;color:var(--ink)}
+.notice-card li::before{content:"";position:absolute;left:2px;top:.78em;width:5px;height:5px;border-radius:50%;background:var(--brand)}
 
 main{max-width:520px;margin:0 auto;padding:18px 16px calc(120px + env(safe-area-inset-bottom,0px))}
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px;margin-bottom:14px}
@@ -94,9 +105,20 @@ footer{text-align:center;font-size:12.5px;color:var(--soft);padding:6px 20px 0}
 </style>
 </head>
 <body>
-<header class="top"><div class="top-in"><h1>청소 요청</h1><span class="pill">시범운영</span></div></header>
+<header class="top"><div class="top-in">
+  <div class="brand">
+    <span class="mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M11 2.5l2.2 6.3 6.3 2.2-6.3 2.2L11 19.5l-2.2-6.3L2.5 11l6.3-2.2z"/><path d="M19 15.5l.9 2.6 2.6.9-2.6.9-.9 2.6-.9-2.6-2.6-.9 2.6-.9z"/></svg></span>
+    <h1>Request a Cleaning</h1>
+  </div>
+  <span class="pill">TEST</span>
+</div></header>
 
 <main>
+  <section class="notice-card" id="notices" aria-label="공지사항" hidden>
+    <h2><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>공지사항</h2>
+    <ul id="noticeList"></ul>
+  </section>
+
   <section class="card" aria-label="요청 작성">
     <div class="field">
       <label class="lab" for="ward">부서명</label>
@@ -170,6 +192,10 @@ async function init() {
       `<label class="kind"><input type="radio" name="kind" value="${esc(k)}"><span class="tile">${icon(k)}${esc(k)}</span></label>`).join("");
     document.querySelectorAll('input[name="kind"]').forEach((el) => el.addEventListener("change", () => (kind = el.value)));
     if (r.office) $("office").textContent = " 급하면 관리사무실 ☎ " + r.office;
+    // 공지: 시트 '설정' 탭의 공지1~공지5 (비어 있으면 숨김)
+    const ns = (r.notices || []).filter(Boolean);
+    $("noticeList").innerHTML = ns.map((n) => `<li>${esc(n)}</li>`).join("");
+    $("notices").hidden = !ns.length;
     const saved = store.get("ward");
     if (saved && r.wards.includes(saved)) { $("ward").value = saved; refresh(); }
     $("ext").value = store.get("ext");
