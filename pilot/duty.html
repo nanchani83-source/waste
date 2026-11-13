@@ -161,6 +161,7 @@ $("regBtn").addEventListener("click", async () => {
   } catch (e) { $("regErr").textContent = e.message || String(e); }
 });
 
+try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) {}
 function showMain() {
   $("reg").hidden = true; $("main").hidden = false;
   $("who").textContent = store.get("name") + "님";
@@ -190,19 +191,18 @@ async function initForeground() {
 }
 
 function card(it) {
-  const cls = it.st === "접수" ? "w" : it.st === "확인" ? "a" : "d";
-  const label = it.st === "접수" ? "대기" : it.st === "확인" ? "처리 중" : "완료";
-  if (cls === "d") {
+  const waiting = it.st === "접수";
+  if (!waiting) {
     return `<div class="req d" id="r${esc(it.id)}"><div class="req-head"><div><div class="dept">${esc(it.ward)} ${esc(it.loc)}</div>
-      <div class="meta">${esc(it.kind)} · ${esc(it.at)}</div></div><span class="tag d">${label}</span></div></div>`;
+      <div class="meta">${esc(it.kind)} · ${esc(it.at)} 접수${it.ackAt ? " · " + esc(it.ackAt) + " 확인" : ""}${it.by ? " · " + esc(it.by) : ""}</div></div><span class="tag d">확인</span></div></div>`;
   }
+  const cls = "w";
   return `<div class="req ${cls}" id="r${esc(it.id)}">
-    <div class="req-head"><div><div class="dept">${esc(it.ward)}</div><div class="loc">${esc(it.loc)}</div></div><span class="tag ${cls}">${label}</span></div>
-    <div class="meta"><b>${esc(it.kind)}</b> · ${esc(it.at)} 접수${it.ackAt ? " · " + esc(it.ackAt) + " 확인" : ""}</div>
+    <div class="req-head"><div><div class="dept">${esc(it.ward)}</div><div class="loc">${esc(it.loc)}</div></div><span class="tag ${cls}">대기</span></div>
+    <div class="meta"><b>${esc(it.kind)}</b> · ${esc(it.at)} 접수</div>
     ${it.memo ? `<div class="memo">메모: ${esc(it.memo)}</div>` : ""}
     ${it.ext ? `<a class="call" href="tel:033258${esc(String(it.ext).replace(/\D/g, ""))}">${PHONE}회신 내선 ${esc(it.ext)}</a>` : ""}
-    ${it.st === "접수" ? `<button class="btn b-ack" data-a="ack" data-id="${esc(it.id)}">확인했습니다</button>` : ""}
-    ${it.st === "확인" ? `<button class="btn b-done" data-a="done" data-id="${esc(it.id)}">청소 완료</button>` : ""}
+    <button class="btn b-ack" data-a="ack" data-id="${esc(it.id)}">확인했습니다</button>
   </div>`;
 }
 
@@ -219,15 +219,15 @@ let cur = [];
 function render() {
   {
     const r = { items: cur };
-    const open = r.items.filter((it) => it.st !== "완료").sort((a, b) => (a.st === "확인") - (b.st === "확인"));
-    const done = r.items.filter((it) => it.st === "완료");
+    const open = r.items.filter((it) => it.st === "접수");
+    const done = r.items.filter((it) => it.st !== "접수");
     const waiting = open.length;
     $("big").hidden = false; $("big").classList.toggle("zero", !waiting);
     $("bigN").textContent = waiting ? waiting : "처리할 요청이 없습니다";
     $("bigT").textContent = waiting ? "건 처리 대기" : "";
     $("list").innerHTML =
       (open.length ? open.map(card).join("") : '<div class="empty"><b>새 요청을 기다리는 중입니다</b>요청이 오면 알림이 울립니다.</div>') +
-      (done.length ? `<details class="dn"><summary>오늘 완료 ${done.length}건</summary>${done.map(card).join("")}</details>` : "");
+      (done.length ? `<details class="dn"><summary>오늘 확인 ${done.length}건</summary>${done.map(card).join("")}</details>` : "");
     document.querySelectorAll("[data-a]").forEach((b) => b.addEventListener("click", () => act(b)));
     if (focusId) { const el = $("r" + focusId); if (el) el.scrollIntoView({ behavior: "smooth", block: "center" }); }
   }
@@ -239,8 +239,7 @@ async function act(b) {
   const it = cur.find((x) => x.id === b.dataset.id);
   if (it) {
     const t = new Date(), hhmm = String(t.getHours()).padStart(2, "0") + ":" + String(t.getMinutes()).padStart(2, "0");
-    if (b.dataset.a === "ack" && it.st === "접수") { it.st = "확인"; it.ackAt = hhmm; }
-    else if (b.dataset.a === "done") { it.st = "완료"; }
+    if (it.st === "접수") { it.st = "확인"; it.ackAt = hhmm; it.by = store.get("name"); }
     render();
   }
   try {
