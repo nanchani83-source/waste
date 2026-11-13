@@ -136,7 +136,7 @@ function showReg() {
   const standalone = navigator.standalone || matchMedia("(display-mode: standalone)").matches;
   $("iosHint").hidden = !(ios && !standalone);
   fetch(API + "?action=people").then((r) => r.json()).then((r) => {
-    $("name").innerHTML = '<option value="">이름을 선택하세요</option>' + r.people.map((p) => `<option value="${esc(p)}">${esc(p)}${(r.registered || []).includes(p) ? " (등록됨)" : ""}</option>`).join("");
+    $("name").innerHTML = '<option value="">이름을 선택하세요</option>' + (r.people || []).slice().sort((a, b) => (b === (r.admin || "관리자")) - (a === (r.admin || "관리자"))).map((p) => `<option value="${esc(p)}">${esc(p)}${(r.registered || []).includes(p) ? " (등록됨)" : ""}</option>`).join("");
   }).catch(() => ($("regErr").textContent = "서버에 연결할 수 없습니다."));
 }
 
@@ -211,6 +211,14 @@ async function load() {
     const r = await (await fetch(API + "?action=duty&deviceId=" + encodeURIComponent(store.get("deviceId")) +
       "&key=" + encodeURIComponent(store.get("key")))).json();
     if (!r.ok) { if (r.error === "auth") { store.del("key"); return showReg(); } throw new Error(r.error); }
+    cur = r.items; render();
+    $("mainErr").textContent = "";
+  } catch (e) { $("mainErr").textContent = "목록을 불러오지 못했습니다. 잠시 후 다시 시도합니다."; }
+}
+let cur = [];
+function render() {
+  {
+    const r = { items: cur };
     const open = r.items.filter((it) => it.st !== "완료").sort((a, b) => (a.st === "확인") - (b.st === "확인"));
     const done = r.items.filter((it) => it.st === "완료");
     const waiting = open.length;
@@ -222,12 +230,19 @@ async function load() {
       (done.length ? `<details class="dn"><summary>오늘 완료 ${done.length}건</summary>${done.map(card).join("")}</details>` : "");
     document.querySelectorAll("[data-a]").forEach((b) => b.addEventListener("click", () => act(b)));
     if (focusId) { const el = $("r" + focusId); if (el) el.scrollIntoView({ behavior: "smooth", block: "center" }); }
-    $("mainErr").textContent = "";
-  } catch (e) { $("mainErr").textContent = "목록을 불러오지 못했습니다. 잠시 후 다시 시도합니다."; }
+  }
 }
 
 async function act(b) {
   b.disabled = true;
+  // 서버 응답을 기다리지 않고 화면부터 바꾼다(실패하면 아래에서 다시 불러와 원래대로 되돌림)
+  const it = cur.find((x) => x.id === b.dataset.id);
+  if (it) {
+    const t = new Date(), hhmm = String(t.getHours()).padStart(2, "0") + ":" + String(t.getMinutes()).padStart(2, "0");
+    if (b.dataset.a === "ack" && it.st === "접수") { it.st = "확인"; it.ackAt = hhmm; }
+    else if (b.dataset.a === "done") { it.st = "완료"; }
+    render();
+  }
   try {
     const r = await (await fetch(API, { method: "POST", body: JSON.stringify({
       action: b.dataset.a, id: b.dataset.id, deviceId: store.get("deviceId"), key: store.get("key") }) })).json();
