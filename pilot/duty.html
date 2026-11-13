@@ -199,7 +199,7 @@ function card(it) {
     <div class="req-head"><div><div class="dept">${esc(it.ward)}</div><div class="loc">${esc(it.loc)}</div></div><span class="tag ${cls}">${label}</span></div>
     <div class="meta"><b>${esc(it.kind)}</b> · ${esc(it.at)} 접수${it.ackAt ? " · " + esc(it.ackAt) + " 확인" : ""}</div>
     ${it.memo ? `<div class="memo">메모: ${esc(it.memo)}</div>` : ""}
-    ${it.ext ? `<a class="call" href="tel:${esc(it.ext)}">${PHONE}회신 내선 ${esc(it.ext)}</a>` : ""}
+    ${it.ext ? `<a class="call" href="tel:033258${esc(String(it.ext).replace(/\D/g, ""))}">${PHONE}회신 내선 ${esc(it.ext)}</a>` : ""}
     ${it.st === "접수" ? `<button class="btn b-ack" data-a="ack" data-id="${esc(it.id)}">확인했습니다</button>` : ""}
     ${it.st === "확인" ? `<button class="btn b-done" data-a="done" data-id="${esc(it.id)}">청소 완료</button>` : ""}
   </div>`;
