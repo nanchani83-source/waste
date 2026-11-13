@@ -249,11 +249,11 @@ function renderItems(items, ward) {
     $("cnt").textContent = items.length ? items.length + "건" : "";
     if (!items.length) { $("list").innerHTML = '<div class="empty">오늘 보낸 요청이 없습니다.</div>'; return; }
     $("list").innerHTML = items.map((it) => {
-      const step = it.st === "완료" ? 3 : it.st === "확인" ? 2 : 1;
-      const when = `<span>접수 ${esc(it.at)}</span><span>${it.doneAt ? "완료 " + esc(it.doneAt) : it.ackAt ? "확인 " + esc(it.ackAt) : "확인 대기"}</span>`;
+      const step = it.st === "접수" ? 1 : 3;
+      const when = `<span>접수 ${esc(it.at)}</span><span>${it.ackAt ? "확인 " + esc(it.ackAt) : "확인 대기"}</span>`;
       return `<div class="req">
         <div class="req-top"><div><b>${esc(it.loc)}</b><div class="kd">${esc(it.kind)}</div></div>
-          <span class="st st-${esc(it.st)}">${esc(it.st === "접수" ? "접수됨" : it.st === "확인" ? "당직자 확인" : it.st)}</span></div>
+          <span class="st st-${esc(it.st)}">${esc(it.st === "접수" ? "접수됨" : it.st === "확인" || it.st === "완료" ? "당직자 확인" : it.st)}</span></div>
         <div class="track s${step}" aria-hidden="true"><i></i><i></i><i></i></div>
         <div class="when">${when}</div>
         ${it.esc && it.st === "접수" ? '<div class="fwd">관리자에게 전달되었습니다</div>' : ""}
