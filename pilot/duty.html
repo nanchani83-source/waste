@@ -98,7 +98,7 @@ a.reset{display:block;text-align:center;color:var(--soft);font-size:15px;margin-
     <label class="lab" for="name">이름</label>
     <select id="name"></select>
     <label class="lab" for="pin">등록코드</label>
-    <input id="pin" type="password" inputmode="numeric" placeholder="관리사무실에서 알려준 번호" autocomplete="off">
+    <input id="pin" type="password" inputmode="numeric" placeholder="받으신 등록코드 번호" autocomplete="off">
     <button class="btn b-main" id="regBtn">알림 켜기</button>
     <div class="err" id="regErr" role="alert"></div>
   </section>
@@ -125,6 +125,7 @@ const store = {
   del(k) { try { localStorage.removeItem(k); } catch (e) {} }
 };
 const focusId = new URLSearchParams(location.search).get("id");
+const deviceLabel = () => { const u = navigator.userAgent; return /android/i.test(u) ? "안드로이드" : /iphone|ipad|ipod/i.test(u) ? "아이폰" : "PC"; };
 const PHONE = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg>';
 
 function showReg() {
@@ -152,7 +153,7 @@ $("regBtn").addEventListener("click", async () => {
     const token = await firebase.messaging().getToken({ vapidKey: PILOT.VAPID, serviceWorkerRegistration: reg });
     if (!token) throw new Error("알림 토큰을 받지 못했습니다.");
     const r = await (await fetch(API, { method: "POST", body: JSON.stringify({
-      action: "register", name, pin, token, deviceId: store.get("deviceId") }) })).json();
+      action: "register", name, pin, token, deviceId: store.get("deviceId"), label: deviceLabel() }) })).json();
     if (!r.ok) throw new Error(r.error);
     store.set("deviceId", r.deviceId); store.set("key", r.key); store.set("name", name);
     showMain();
