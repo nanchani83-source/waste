@@ -1,8 +1,9 @@
 {
+  "id": "duty.html",
   "name": "당직 청소요청",
   "short_name": "당직알림",
   "start_url": "duty.html",
-  "scope": "./",
+  "scope": "duty.html",
   "display": "standalone",
   "background_color": "#F2F4F7",
   "theme_color": "#1F2D3A",
