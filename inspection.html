@@ -238,45 +238,46 @@ td { border-bottom:1px solid var(--line); padding:10px 6px; text-align:center; }
 // ============================================================
 const INSPECTION_API = "";
 
-// 점검항목 (점검표 양식) — 병원 점검표에 맞게 수정
+// 점검항목 (점검표 양식) — 점검문항.docx 기준 (A1~A10)
 const CHECK_ITEMS = [
-  { id:"A1", name:"배출자·사용개시연월일 기재",              basis:"사용개시일은 최초 투입일 기재, 보관기간 산정 기준" },
-  { id:"A2", name:"일반쓰레기 혼입 금지",                    basis:"의료소모품 포장지·종이류·핸드타올·알콜티슈 케이스 등은 일반쓰레기 (개인정보가 담긴 종이는 파쇄)" },
-  { id:"A3", name:"적정 용량 준수·과적재 금지",         basis:"과적재 시 밀폐 포장 불가, 봉투형용기 적정용량 75% 준수" },
-  { id:"A4", name:"사용 중 용기 뚜껑·덮개 닫힘(인증)",            basis:"악취·감염 전파 방지 (권장사항)" },
-  { id:"A5", name:"손상성폐기물 합성수지 용기 사용",        basis:"주사바늘·칼날 등은 합성수지 상자형 용기" },
-  { id:"A6", name:"적정 전용용기 사용 (액상·조직물류)",     basis:"액체상태 폐기물은 합성수지 용기 사용, 내부 용액 제거 후 폐기" },
-  { id:"A7", name:"부서 보관기한 준수",                     basis:"부서 보관기한 : 격리 5일 / 조직·액상·일반 10일 / 손상성 25일" },
-  { id:"A8", name:"일회용기저귀 분리배출",                  basis:"혈변, 혈액 포함된 일회용기저귀는 의료폐기물 용기 사용" },
-  { id:"A9", name:"투입 완료 용기 밀폐 포장",               basis:"투입이 끝난 용기는 밀폐, 재사용 금지" }
+  { id:"A1",  name:"적정 전용용기 사용(격리, 액상, 손상성 등)", basis:"액체상태 폐기물은 합성수지류, 내부용액을 제거 후 골판지류" },
+  { id:"A2",  name:"전용용기 불량, 파손 여부",                  basis:"불량 및 파손된 용기는 교체 사용" },
+  { id:"A3",  name:"배출자·사용개시연월일 기재",                basis:"사용개시일은 최초 투입일 기재, 보관기간 산정 기준" },
+  { id:"A4",  name:"적정용량 수집 및 밀폐포장",                 basis:"과적재 시 밀폐포장 불가, 봉투형용기 적정용량 75% 준수" },
+  { id:"A5",  name:"부서 보관기한 준수",                        basis:"부서 보관기한 : 격리 5일 / 손상성 25일 / 그 외 10일" },
+  { id:"A6",  name:"비 감염성 일회용기저귀 분리배출",           basis:"감염병 환자 및 혈액, 혈뇨가 섞인 기저귀는 의료폐기물" },
+  { id:"A7",  name:"의료폐기물 처리 지침표 게시",               basis:"최근 개정본(2026.05.), 그룹웨어 자료실 참조" },
+  { id:"A8",  name:"사용 중 용기 덮개 유무(인증)",              basis:"악취·감염 전파 방지 (권장사항)" },
+  { id:"A9",  name:"일반쓰레기, 재활용품 등 혼합 배출 금지",    basis:"의료소모품포장지·종이류·알콜티슈 케이스 등은 일반쓰레기(개인정보가 담긴 종이는 파쇄)" },
+  { id:"A10", name:"배치장소 주변 오염(흘림) 및 청결 상태",     basis:"감염주의, 의료폐기물 방치 주의" }
 ];
 
 const LAW = "폐기물관리법, 2년 이하의 징역 또는 2천만원 이하의 벌금";
 const COST = "의료폐기물 발생량 증가, 관리비 상승 (병원 운영계획 위배)";
 
 // 점검 이력 — 위반이 확인된 부서만 기재
-// items: 점검항목 id별 위반 건수, repeat: 올해 이전 점검에서도 지적된 부서
+// items: 점검항목(점검문항.docx 번호) id별 위반 건수, repeat: 올해 이전 점검에서도 지적된 부서
 const INSPECTIONS = [
   // 2026년 5월
-  { date:"2026-05", dept:"42병동",        items:{ A3:2, A2:2 }, action:"현장지도, 해당 용기 배출/교체" },
-  { date:"2026-05", dept:"52병동",        items:{ A6:1 },       action:"현장지도, 해당 용기 배출/교체" },
-  { date:"2026-05", dept:"82병동",        items:{ A1:2 },       action:"현장지도, 사용개시연월일 기재" },
-  { date:"2026-05", dept:"제2물리치료실", items:{ A1:1 },       action:"현장지도, 사용개시연월일 기재" },
-  { date:"2026-05", dept:"CCU",           items:{ A2:1 },       action:"현장지도" },
-  { date:"2026-05", dept:"50병동",        items:{ A3:1 },       action:"관련 내용 전달, 주의 요청", note:"점검 외 평시 의료폐기물 수거 시 확인 (과적재, 밀폐 포장 불가)" },
+  { date:"2026-05", dept:"42병동",        items:{ A4:2, A9:2 }, action:"현장지도, 해당 용기 배출/교체" },
+  { date:"2026-05", dept:"52병동",        items:{ A1:1 },       action:"현장지도, 해당 용기 배출/교체" },
+  { date:"2026-05", dept:"82병동",        items:{ A3:2 },       action:"현장지도, 사용개시연월일 기재" },
+  { date:"2026-05", dept:"제2물리치료실", items:{ A3:1 },       action:"현장지도, 사용개시연월일 기재" },
+  { date:"2026-05", dept:"CCU",           items:{ A9:1 },       action:"현장지도" },
+  { date:"2026-05", dept:"50병동",        items:{ A4:1 },       action:"관련 내용 전달, 주의 요청", note:"점검 외 평시 의료폐기물 수거 시 확인 (과적재, 밀폐 포장 불가)" },
   // 2026년 7월 (점검일 07.10.)
-  { date:"2026-07", dept:"어린이병원 채혈실", items:{ A7:2 },       action:"현장지도, 해당 용기 배출/교체" },
-  { date:"2026-07", dept:"NICU",          items:{ A7:1, A2:1 }, action:"현장지도, 해당 용기 배출/교체" },
-  { date:"2026-07", dept:"40병동",        items:{ A2:1 },       action:"현장지도" },
-  { date:"2026-07", dept:"42병동",        items:{ A1:1 },       action:"현장지도, 사용개시연월일 기재", repeat:true, note:"'26.05. 과적재 2건, 혼입 2건" },
-  { date:"2026-07", dept:"45병동",        items:{ A1:1 },       action:"현장지도, 사용개시연월일 기재" },
-  { date:"2026-07", dept:"53병동",        items:{ A1:2 },       action:"현장지도, 사용개시연월일 기재" },
-  { date:"2026-07", dept:"63병동",        items:{ A1:1, A2:1 }, action:"현장지도, 사용개시연월일 기재" },
+  { date:"2026-07", dept:"어린이병원 채혈실", items:{ A5:2 },       action:"현장지도, 해당 용기 배출/교체" },
+  { date:"2026-07", dept:"NICU",          items:{ A5:1, A9:1 }, action:"현장지도, 해당 용기 배출/교체" },
+  { date:"2026-07", dept:"40병동",        items:{ A9:1 },       action:"현장지도" },
+  { date:"2026-07", dept:"42병동",        items:{ A3:1 },       action:"현장지도, 사용개시연월일 기재", repeat:true, note:"'26.05. 과적재 2건, 혼입 2건" },
+  { date:"2026-07", dept:"45병동",        items:{ A3:1 },       action:"현장지도, 사용개시연월일 기재" },
+  { date:"2026-07", dept:"53병동",        items:{ A3:2 },       action:"현장지도, 사용개시연월일 기재" },
+  { date:"2026-07", dept:"63병동",        items:{ A3:1, A9:1 }, action:"현장지도, 사용개시연월일 기재" },
   // 2026년 9월
-  { date:"2026-09", dept:"핵의학과",      items:{ A1:1 },             action:"현장지도, 사용개시연월일 기재" },
-  { date:"2026-09", dept:"33병동",        items:{ A7:2 },             action:"현장지도, 해당 용기 배출/교체" },
-  { date:"2026-09", dept:"52병동",        items:{ A3:2, A1:1, A2:1 }, action:"현장지도, 해당 용기 배출/교체, 사용개시연월일 기재", repeat:true, note:"'26.05. 부적정 전용용기 1건" },
-  { date:"2026-09", dept:"53병동",        items:{ A7:1, A1:2, A2:1 }, action:"현장지도, 해당 용기 배출/교체, 사용개시연월일 기재", repeat:true, note:"'26.07. 미기재 2건 (반복 발생)" },
+  { date:"2026-09", dept:"핵의학과",      items:{ A3:1 },             action:"현장지도, 사용개시연월일 기재" },
+  { date:"2026-09", dept:"33병동",        items:{ A5:2 },             action:"현장지도, 해당 용기 배출/교체" },
+  { date:"2026-09", dept:"52병동",        items:{ A4:2, A3:1, A9:1 }, action:"현장지도, 해당 용기 배출/교체, 사용개시연월일 기재", repeat:true, note:"'26.05. 부적정 전용용기 1건" },
+  { date:"2026-09", dept:"53병동",        items:{ A5:1, A3:2, A9:1 }, action:"현장지도, 해당 용기 배출/교체, 사용개시연월일 기재", repeat:true, note:"'26.07. 미기재 2건 (반복 발생)" },
 ];
 
 // 위반사례 예시 — 유형별 대표 1건 (타 부서 참고용, 문서·개인정보가 보이는 사진은 흐림 처리)
@@ -284,15 +285,15 @@ const INSPECTIONS = [
 const PHOTO_BASE = "img/inspection/";
 const DRIVE_IMG = "https://lh3.googleusercontent.com/d/";
 const VIOLATIONS = [
-  { item:"A1", title:"배출자·사용개시연월일 미기재", photo:"14IDTcDGVZ-x493SVroiV1JGKc9dwThrD", file:"A1.jpg", cap:"사용개시연월일·배출자 칸이 비어 있음",
+  { item:"A3", title:"배출자·사용개시연월일 미기재", photo:"14IDTcDGVZ-x493SVroiV1JGKc9dwThrD", file:"A1.jpg", cap:"사용개시연월일·배출자 칸이 비어 있음",
     law:LAW, how:"용기에 처음 폐기물을 넣는 날, 배출자(부서명)와 사용개시연월일을 반드시 기재하십시오." },
-  { item:"A2", title:"일반쓰레기 혼입", photo:"1mykoP01Khw7LrzMZvrEk-b_FfiqX8p20", file:"A2.jpg", cap:"의료소모품 포장지·핸드타올 등이 혼입됨",
+  { item:"A9", title:"일반쓰레기 혼입", photo:"1mykoP01Khw7LrzMZvrEk-b_FfiqX8p20", file:"A2.jpg", cap:"의료소모품 포장지·핸드타올 등이 혼입됨",
     law:COST, how:"의료소모품 포장지, 핸드타올, 알콜티슈 케이스 등은 일반쓰레기로 배출하십시오. 개인정보가 담긴 종이는 파쇄 후 일반쓰레기로 배출하십시오." },
-  { item:"A3", title:"과적재·적정 용량 미준수", photo:"1uF3455ml2cjKxx_ZZy7bNWtQYqNCMGh5", file:"A3.jpg", cap:"봉투형용기 적정용량 초과",
+  { item:"A4", title:"과적재·적정 용량 미준수", photo:"1uF3455ml2cjKxx_ZZy7bNWtQYqNCMGh5", file:"A3.jpg", cap:"봉투형용기 적정용량 초과",
     law:LAW, how:"의료폐기물은 전용용기에 밀폐 가능한 범위내에 가득 채워 배출하여야 합니다. 단, 봉투형용기는 75% 미만으로 채워 배출하십시오." },
-  { item:"A6", title:"부적정 전용용기 사용", photo:"1CzmSoglqQIFrsZtFoEhBzs-YVI4XFXtW", file:"A6.jpg", cap:"손상성·액상 폐기물을 봉투형용기에 배출",
+  { item:"A1", title:"부적정 전용용기 사용", photo:"1CzmSoglqQIFrsZtFoEhBzs-YVI4XFXtW", file:"A6.jpg", cap:"손상성·액상 폐기물을 봉투형용기에 배출",
     law:LAW, how:"손상성·액상 폐기물은 합성수지 전용용기에 배출하십시오. 액상은 내부 용액을 제거한 뒤 폐기하십시오." },
-  { item:"A7", title:"부서 보관기한 초과", photo:"19g4JR46UVN1bucQGOAnyVtMu8b4CKqKc", file:"A7.jpg", cap:"사용개시 26.6.4. → 점검일 07.10. 보관기한(10일) 초과",
+  { item:"A5", title:"부서 보관기한 초과", photo:"19g4JR46UVN1bucQGOAnyVtMu8b4CKqKc", file:"A7.jpg", cap:"사용개시 26.6.4. → 점검일 07.10. 보관기한(10일) 초과",
     law:LAW, how:"일반의료폐기물의 부서 보관기간은 10일입니다 (격리 5일 / 손상성 25일). 기한 내에 반출을 요청하십시오." },
 ];
 
