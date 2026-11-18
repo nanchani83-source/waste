@@ -291,11 +291,25 @@ async function act(b) {
 }
 
 $("testBtn").addEventListener("click", async () => {
+  const btn = $("testBtn");
+  if (btn.disabled) return;
+  btn.disabled = true; btn.textContent = "알림 보내는 중…";
   $("mainErr").className = "err"; $("mainErr").textContent = "";
-  const r = await (await fetch(API, { method: "POST", body: JSON.stringify({
-    action: "test", deviceId: store.get("deviceId"), key: store.get("key") }) })).json();
-  $("mainErr").className = r.ok ? "ok" : "err";
-  $("mainErr").textContent = r.ok ? "테스트 알림을 보냈습니다. 잠시 후 알림이 오면 정상입니다." : "발송하지 못했습니다: " + (r.error || "");
+  try {
+    const r = await (await fetch(API, { method: "POST", body: JSON.stringify({
+      action: "test", deviceId: store.get("deviceId"), key: store.get("key") }) })).json();
+    $("mainErr").className = r.ok ? "ok" : "err";
+    $("mainErr").textContent = r.ok ? "테스트 알림을 보냈습니다. 잠시 후 알림이 오면 정상입니다." : "발송하지 못했습니다: " + (r.error || "");
+  } catch (e) {
+    $("mainErr").className = "err"; $("mainErr").textContent = "발송하지 못했습니다. 잠시 후 다시 시도해 주세요.";
+  }
+  // 알림이 도착할 시간을 두고 10초 뒤에 다시 누를 수 있게 한다
+  let n = 10; btn.textContent = "알림 도착 대기 중… (" + n + ")";
+  const t = setInterval(() => {
+    n--;
+    if (n <= 0) { clearInterval(t); btn.disabled = false; btn.textContent = "테스트 알림 받아보기"; }
+    else btn.textContent = "알림 도착 대기 중… (" + n + ")";
+  }, 1000);
 });
 $("reset").addEventListener("click", (e) => {
   e.preventDefault();
