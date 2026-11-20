@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="robots" content="noindex, nofollow, noarchive">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b4f8a">
+  <title>병원 길안내</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230b4f8a'/%3E%3Cpath d='M16 6c-4.4 0-8 3.4-8 7.7C8 19.6 16 27 16 27s8-7.4 8-13.3C24 9.4 20.4 6 16 6Z' fill='%23fff'/%3E%3Ccircle cx='16' cy='13.5' r='3' fill='%230b4f8a'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+  <link rel="stylesheet" href="css/app.css?v=2026-11-18e">
+  <!-- 3D 보기(Three.js)는 버튼을 누를 때만 불러온다 -->
+  <script type="importmap">
+  { "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  } }
+  </script>
+</head>
+<body>
+  <header class="top">
+    <div class="top-row">
+      <h1 class="sr-only">병원 길안내</h1>
+      <label class="bld">
+        <span class="sr-only">건물 선택</span>
+        <select id="bldSel" aria-label="건물 선택"></select>
+      </label>
+      <div class="floor-tabs" id="floorTabs" role="tablist" aria-label="층 선택"></div>
+    </div>
+  </header>
+
+  <main id="map" aria-label="평면도"></main>
+
+  <section class="sheet" id="sheet" aria-live="polite">
+    <button class="sheet-mini" id="sheetMini" type="button" aria-label="경로 안내 다시 올리기"><span id="sheetMiniText">경로 안내</span><span class="up">▲ 올리기</span></button>
+    <!-- 1) 목적지 찾기 -->
+    <div id="findView">
+      <div class="event-bar" id="eventBar" hidden></div>
+      <div class="here" id="hereLine"></div>
+      <label class="search">
+        <span class="sr-only">가고 싶은 곳</span>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+        <input id="q" type="search" placeholder="어디로 가시나요? 예) 정형외과, 채혈실, 52병동" autocomplete="off" enterkeyhint="search">
+      </label>
+      <ul class="results" id="results" role="listbox" aria-label="검색 결과"></ul>
+      <div class="chips" id="chips"></div>
+      <label class="toggle"><input type="checkbox" id="avoidStairs"> <span>계단 없는 경로 (휠체어·유모차)</span></label>
+    </div>
+
+    <!-- 2) 경로 안내 -->
+    <div id="routeView" hidden>
+      <div class="route-head">
+        <div>
+          <div class="dest" id="destName"></div>
+          <div class="summary" id="summary"></div>
+        </div>
+        <div class="head-btns">
+          <button class="ghost fold-btn" id="btnFold" type="button" aria-label="안내 내리기">▼ 내리기</button>
+          <button class="ghost" id="btnReset" type="button">다른 곳</button>
+        </div>
+      </div>
+      <ol class="seg-tabs" id="segTabs"></ol>
+      <ol class="steps" id="steps"></ol>
+      <div class="dir-card" id="dirCard" hidden></div>
+      <div class="nav">
+        <button class="secondary" id="btnPrev" type="button">◀ 이전</button>
+        <button class="primary" id="btnNext" type="button">다음 ▶</button>
+      </div>
+      <button class="btn-nav" id="btnNav" type="button">🧭 걸으면서 방향 안내 받기</button>
+      <div class="nav-box" id="navBox" hidden></div>
+      <button class="btn-3d" id="btn3d" type="button" hidden>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 3 7.5l9 4.5 9-4.5L12 3Z"/><path d="m3 12 9 4.5 9-4.5"/><path d="m3 16.5 9 4.5 9-4.5"/></svg>
+        3D로 전체 경로 보기
+      </button>
+    </div>
+    <p class="msg" id="msg" hidden></p>
+  </section>
+
+  <div class="view3d" id="view3d" hidden>
+    <div class="view3d-bar">
+      <strong id="view3dTitle">전체 경로 3D</strong>
+      <button class="ghost light" id="btnClose3d" type="button">2D로 돌아가기</button>
+    </div>
+    <div class="view3d-canvas" id="view3dCanvas"></div>
+    <div class="view3d-legend">한 손가락: 돌리기 · 두 손가락: 확대/이동</div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+  <script src="js/route.js?v=2026-11-18e"></script>
+  <script src="js/search.js?v=2026-11-18e"></script>
+  <script src="js/motion.js?v=2026-11-18e"></script>
+  <script src="js/app.js?v=2026-11-18e"></script>
+</body>
+</html>
